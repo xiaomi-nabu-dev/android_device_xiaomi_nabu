@@ -153,3 +153,11 @@ nabu 的 FrameworkResOverlayNabu 将 config_supportLongPressPowerWhenNonInteract
 实机需验证单击锁屏/唤醒、连续按键、双击相机、长按菜单/手电筒设置，以及皮套开合。源码推断与症状吻合，尚待新 overlay 的实机结果。
 
 FrameworkResOverlayNabu 定向构建通过；aapt2 确认设备 APK 中不再覆盖该 bool，已构建 framework-res.apk 的默认值为 true。validate-tree.py 和 git diff --check 通过。
+
+## 独立修复：标准显示设置的双击唤醒支持开关
+
+用户实机确认 /sys/touchpanel/double_tap 手动写 1 后双击有效，节点 owner/group=system/system、mode=0660、标签=nabu_sysfs_touchpanel；有效资源 config_supportDoubleTapWake=false，settings secure double_tap_to_wake 为 null，开关操作未出现 Power HAL mode 日志。PowerManagerService 仅在该支持资源为 true 时观察设置并发送 DOUBLE_TAP_TO_WAKE。在 FrameworkResOverlayNabu 显式设置 true，以免依赖没有在当前平板产品生效的 common overlay。Power HAL 已编译正确节点路径且支持该模式，不改内核和权限。
+
+FrameworkResOverlayNabu 定向构建通过，aapt2 确认 APK 的 config_supportDoubleTapWake=true；静态树与 diff 检查通过。刷入后需重新进入标准显示设置，先关闭再开启；确认 secure double_tap_to_wake 和驱动节点同时从 0 变成 1。若该 secure 值仍不变化，需确认实际开关所属 Activity，排除自定义平板设置入口。
+
+Git Bash 会将 /sys 等参数转换为 Windows 路径。外部 adb shell 命令前使用 MSYS_NO_PATHCONV=1，或进入 adb shell 后执行 Android 路径命令。

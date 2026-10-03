@@ -606,4 +606,6 @@
 
     <!-- Doze: should the TYPE_PICK_UP_GESTURE sensor be used as a pulse signal. -->
     <bool name="config_dozePulsePickup">true</bool>
+    <!-- Route the standard display setting to Power HAL DOUBLE_TAP_TO_WAKE. -->
+    <bool name="config_supportDoubleTapWake">true</bool>
 </resources>
