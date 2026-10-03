@@ -17,7 +17,9 @@
     "path": "kernel/xiaomi/sm8150",
     "upstream": "https://github.com/LineageOS/android_kernel_xiaomi_sm8150",
     "branch": "lineage-22.2",
-    "commit": "59220a048d04516e7fe1dfc094507930166a1e60"
+    "commit": "59220a048d04516e7fe1dfc094507930166a1e60",
+    "local_integration_branch": "nabu-los20",
+    "local_integration_commit": "ef12961c6526cb4b5ab16cc40522234d79642cbb"
   },
   {
     "path": "vendor/xiaomi/nabu",

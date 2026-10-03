@@ -161,3 +161,13 @@ FrameworkResOverlayNabu 定向构建通过；aapt2 确认设备 APK 中不再覆
 FrameworkResOverlayNabu 定向构建通过，aapt2 确认 APK 的 config_supportDoubleTapWake=true；静态树与 diff 检查通过。刷入后需重新进入标准显示设置，先关闭再开启；确认 secure double_tap_to_wake 和驱动节点同时从 0 变成 1。若该 secure 值仍不变化，需确认实际开关所属 Activity，排除自定义平板设置入口。
 
 Git Bash 会将 /sys 等参数转换为 Windows 路径。外部 adb shell 命令前使用 MSYS_NO_PATHCONV=1，或进入 adb shell 后执行 Android 路径命令。
+
+## 独立修复：FG/ds28e16 不支持属性的重复日志
+
+日志中的属性 67 是 POWER_SUPPLY_PROP_SCOPE，属性 4 是 POWER_SUPPLY_PROP_ONLINE。power_supply_is_system_supplied 的 class 遍历会直接对每个电源设备调用 SCOPE，并对非 battery/BMS 的辅助设备调用 ONLINE；FG 和电池认证设备没有声明这些属性，回调因此持续打印 unsupported property。该遍历也存在于 recovery 内核路径，和 Android framework 无关。
+
+内核 power_supply_core.c 在这条遍历路径中先检查 desc->properties，只查询驱动声明的 SCOPE/ONLINE；未声明 SCOPE 的设备保留原有默认系统范围和计数行为，未声明 ONLINE 的辅助设备不参与在线供电判断。没有给认证芯片编造 ONLINE 状态，也没有降级或屏蔽驱动的其他错误日志。kernel 单独提交，upstream-lock.json 保留官方基线并新增本地整合提交。
+
+实际修改函数的 host harness 通过 SM8150 和通用两种编译路径：辅助设备、BMS、在线/离线充电器、设备范围 supply、属性读取错误和 battery 分支。checkpatch --strict 无错误/警告/检查项；bootimage 和 vendorbootimage 构建通过（2 分 16 秒），两镜像的嵌入 AVB hash 校验通过。vendor_boot 解包确认正常/recovery fstab 均恢复 F2FS。
+
+测试镜像位于 `/home/dengxh/nabu_debug/power-supply-fix/`；本次内核逻辑修复只需刷 boot，recovery 也复用其中的内核，无需格式化 data。实际日志是否停止及充电/电池状态仍待实机复测。后续组织仓库发布必须包含新 kernel 整合提交，不能仅取官方基线。
