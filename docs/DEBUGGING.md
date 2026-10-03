@@ -125,3 +125,9 @@ logcat 显示 perf-hal-2-2 因缺少 vendor.qti.hardware.perf@2.0.so 循环退�
 用户要求先记录待核实项。Thermal HAL 的最早错误是 No thermal zone for sensor: xo-therm；初始化在此中止，Android 无法读取温度和阈值。nabu DTS 的 VADC/ADC-TM 配置使用 xo_therm，但实际注册到 /sys/class/thermal/thermal_zone*/type 的名称仍需实机确认，不能只据 DTS 改 HAL 映射。待采集各 zone 的 type/temp，再确认修复位置。
 
 mi_thermald 多次被拒绝 dac_override；日志未给出对应访问路径，需核对实际节点的 owner/group/mode 后调整具体权限，暂不授予泛用的 DAC 绕过能力。ThermalEngine 还有旧节点不存在和部分 sensor 初始化失败，需要与当前内核节点对照。
+
+## 独立修复：KGSL 的 SELinux 标签
+
+GPU 根目录 /devices/platform/soc/2c00000.qcom,kgsl-3d0 被 common 标为 sysfs_msm_subsys，导致 SurfaceFlinger、graphics allocator 和 SystemUI 连目录遍历都被拒绝。改为 Qualcomm 现有的 vendor_sysfs_kgsl 类型，复用已有图形访问规则，不向应用开放所有 msm subsystem 节点。该 SoC 共性修复单独提交在 common；锁定文件同步记录整合提交。
+
+selinux_policy 全套检查通过，包括 neverallow 和 Treble 策略兼容性；实机拒绝是否消失仍需新 ROM 验证。CPU/DCVS 节点的其他权限拒绝没有在本项中扩大授权。
