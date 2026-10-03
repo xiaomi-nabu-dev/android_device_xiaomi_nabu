@@ -143,3 +143,13 @@ selinux_policy 全套检查通过，包括 neverallow 和 Treble 策略兼容性
 当前内核将声卡与 WLAN 驱动内建，日志也确认声卡注册和 WLAN 驱动加载；移除针对不存在 audio_* 与 qca_cld3_wlan.ko 模块文件的旧 modprobe/insmod。删除无定义的 audioadsprpcd_audiopd、spdaemon、sec_nvm 启动请求，以及缺失的 USB 测试、panel-info、LED 和外置 mdm helper/launcher 脚本调用或服务。它们此前均无法执行；保留已恢复的 modem storage/TFTP、pm-proxy、PD mapper 和 QRTR 服务。
 
 两份 rc 的 host_init_verifier 和定向构建通过。没有改动系统 audioserver.rc 中兼容不同设备的可选 HAL 启动请求。
+
+## 独立修复：单击电源键不能唤醒
+
+用户确认电源键锁屏正常，单击不唤醒，但皮套开合和双击电源启动相机可以唤醒。WindowManager 日志显示 interactive=false/count=1/beganFromNonInteractive=true，证明电源键事件已经到达策略层。SideFpsEventHandler.notifyPowerPressed 在单击时被无条件调用；单击指纹拦截仅发生在 interactive=true 的分支，不能据此日志判断指纹拦截了唤醒。
+
+nabu 的 FrameworkResOverlayNabu 将 config_supportLongPressPowerWhenNonInteractive 覆盖为 false。当前 LOS 20 interceptPowerKeyDown 在灭屏时仅对 FLAG_LONG_PRESS 或启用非交互长按且存在长按动作的情况调用 wakeUpFromPowerKey；普通单击随后进入 powerPress 时，也不会在 interactive=false 分支补充唤醒。删除设备的 false 覆盖，恢复 Lineage common overlay 的 true 默认值；无需修改框架或内核。
+
+实机需验证单击锁屏/唤醒、连续按键、双击相机、长按菜单/手电筒设置，以及皮套开合。源码推断与症状吻合，尚待新 overlay 的实机结果。
+
+FrameworkResOverlayNabu 定向构建通过；aapt2 确认设备 APK 中不再覆盖该 bool，已构建 framework-res.apk 的默认值为 true。validate-tree.py 和 git diff --check 通过。
