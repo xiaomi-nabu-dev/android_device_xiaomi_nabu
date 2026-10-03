@@ -209,3 +209,6 @@ persist.vendor.bt.aac_frm_ctl.enabled=true
 persist.vendor.btstack.connect.peer_earbud=true
 persist.vendor.btstack.enable.twsplus=true
 persist.vendor.btstack.enable.twsplussho=true
+
+# Reinitialize the panel when recovery takes over from the bootloader.
+ro.recovery.ui.blank_unblank_on_init=true
