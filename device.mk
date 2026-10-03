@@ -55,3 +55,12 @@ PRODUCT_PACKAGES += XiaomiPad5Settings custom.hardware.hwcontrol-service
 
 # Use the upstream Xiaomi camera compatibility stubs.
 PRODUCT_PACKAGES += libMegviiFacepp-0.5.2 libmegface
+
+# Native USB debugging before framework startup. The normal adbd service is
+# released when APEX activation completes; recovery has its own post-fs hook.
+PRODUCT_PACKAGES_DEBUG += nabu-debug-init
+ifneq ($(filter userdebug eng,$(TARGET_BUILD_VARIANT)),)
+PRODUCT_SYSTEM_DEFAULT_PROPERTIES += \
+    ro.adb.secure.recovery=0 \
+    persist.sys.usb.config=adb
+endif

@@ -12,6 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# Allow unauthenticated USB ADB while bringing up userdebug/eng builds.
+# This must be set before Lineage's common product chooses ro.adb.secure.
+ifneq ($(filter userdebug eng,$(TARGET_BUILD_VARIANT)),)
+WITH_ADB_INSECURE := true
+endif
+
 # Inherit some common LineageOS stuff.
 $(call inherit-product, vendor/lineage/config/common_full_tablet_wifionly.mk)
 

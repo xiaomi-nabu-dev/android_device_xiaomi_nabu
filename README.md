@@ -23,3 +23,5 @@ Display | IPS LCD, 1B colors, 120Hz, HDR10, Dolby Vision
 ## LineageOS 20 common split
 
 See [MIGRATION.md](MIGRATION.md) for the upstream layout and build instructions, and [VALIDATION.md](VALIDATION.md) for completed checks.
+
+See [DEBUGGING.md](DEBUGGING.md) for recovery display initialization and early USB ADB on debugging builds.

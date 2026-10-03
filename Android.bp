@@ -7,3 +7,10 @@
 soong_namespace {
     imports: ["hardware/qcom-caf/bootctrl"],
 }
+
+prebuilt_etc {
+    name: "nabu-debug-init",
+    src: "rootdir/etc/init.nabu.debug.rc",
+    filename: "init.nabu.debug.rc",
+    sub_dir: "init",
+}
