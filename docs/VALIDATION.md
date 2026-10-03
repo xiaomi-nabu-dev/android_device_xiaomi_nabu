@@ -46,3 +46,9 @@ APK 资源检查确认 6 个 nabu 特性均启用，刷新率配置为 default=1
 完整构建在 target-files 的 product.img 生成阶段失败：460 MiB 文件树加约 29 MiB 预留空间，但继承的 `product_extfs_inode_count=-1` 让 mke2fs 创建了 125312 个 inode，inode 表与文件系统元数据耗尽了预留空间。nabu 侧清空 product/system/system_ext 的显式 inode 数，让 build_image 按实际文件树计算；common 保持原配置。
 
 构建变量解析确认三个 inode 设置为空、预留空间仍为 30720000 字节。使用失败构建的 PRODUCT 文件树、filesystem_config 和 SELinux contexts，单独生成 product.img 成功（包括 AVB hashtree/footer）；最终文件系统 640 个 inode，剩余 7180 个 4 KiB block。验证产物位于 `/tmp/nabu-product-inodes-check/`，尚未重新完成完整 ROM/OTA 打包。
+
+## ext4 userdata 默认配置
+
+BoardConfig 解析确认 userdata_fs_type=ext4、TARGET_USERIMAGES_USE_EXT4=true、TARGET_USERIMAGES_USE_F2FS=false；使用设备自己的 recovery fstab。vendor fstab 与 first-stage ramdisk fstab 安装输出的 /data 都是 ext4/checkpoint=block；去除了 F2FS 专用挂载项。CONFIG_EXT4_FS、FS_ENCRYPTION、DM_BOW、UNICODE 在内核中启用。
+
+vendorbootimage 与 vendor fstab 定向构建通过（1 分 52 秒）。解包 vendor_boot 确认 first_stage_ramdisk/fstab.qcom 和 system/etc/recovery.fstab 的 /data 均为 ext4/checkpoint=block，嵌入 AVB hash 校验通过。迁移 recovery 位于 `/home/dengxh/nabu_debug/ext4-recovery/vendor_boot.img`。本次未操作设备、未格式化数据，也未实际完成 ext4 的首次启动/OTA 实机验证。

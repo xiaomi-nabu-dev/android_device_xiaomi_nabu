@@ -65,3 +65,11 @@ bash device/xiaomi/nabu/setup-makefiles.sh
 以原 43eca20 为终点的 616 个旧提交已压成一个根快照；之后的移植、recovery 修复、ADB 调试、清理与公共实现整合分别提交。原始历史及整合前的仓库快照在源码树外 `/home/dengxh/android2/nabu-dt-backups/` 的 Git bundle 中保留，上游远程分支用于溯源。
 
 此前从 337 清理到 278 个文件，本次进一步把可配置公共实现移入 common，设备树主要保留数据和硬件差异。当前验证结果见 [VALIDATION.md](VALIDATION.md)；recovery/ADB 调试说明见 [DEBUGGING.md](DEBUGGING.md)。
+
+## 默认 userdata 改用 ext4
+
+官方 cepheus 的 lineage-20 继承 sm8150-common，默认 /data 实际是 F2FS；它不是本次 ext4 选择的依据。按用户要求，nabu 单独覆盖 BOARD_USERDATAIMAGE_FILE_SYSTEM_TYPE=ext4，并关闭 TARGET_USERIMAGES_USE_F2FS；common 不变。设备 fstab 的 /data 改为 ext4，去除 reserve_root/resgid/fsync_mode 等 F2FS 挂载项，使用 checkpoint=block（内核 CONFIG_DM_BOW=y）。保留 FBE、wrapped key、metadata encryption、quota 和预留空间。CONFIG_UNICODE=y 继续保留，因为 Android 的 emulated storage casefold 并非仅适用于 F2FS。
+
+已有 F2FS 数据不能通过替换 fstab 原地转换。迁移前先备份应用及内部存储，使用本次构建的新 recovery（vendor_boot）执行 Factory reset → Format data，再安装完整 ROM ZIP。格式化会清空应用和内部存储；旧 recovery 的 fstab 仍指定 F2FS，不能用旧 recovery 完成这次切换。仅刷 boot 或 ZIP 而不重新格式化，不构成文件系统迁移。不要对现有数据直接运行 mkfs。
+
+启动后可用 `adb shell cat /proc/mounts` 确认 /data 的类型为 ext4。本次只修改默认配置，没有在设备上格式化或刷机。
