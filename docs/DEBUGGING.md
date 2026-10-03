@@ -161,7 +161,3 @@ FrameworkResOverlayNabu 定向构建通过；aapt2 确认设备 APK 中不再覆
 FrameworkResOverlayNabu 定向构建通过，aapt2 确认 APK 的 config_supportDoubleTapWake=true；静态树与 diff 检查通过。刷入后需重新进入标准显示设置，先关闭再开启；确认 secure double_tap_to_wake 和驱动节点同时从 0 变成 1。若该 secure 值仍不变化，需确认实际开关所属 Activity，排除自定义平板设置入口。
 
 Git Bash 会将 /sys 等参数转换为 Windows 路径。外部 adb shell 命令前使用 MSYS_NO_PATHCONV=1，或进入 adb shell 后执行 Android 路径命令。
-
-## 后续默认文件系统调整
-
-用户选择将默认 /data 改为 ext4。此前 F2FS/UNICODE 排查保留为历史记录；新配置及数据迁移步骤见 MIGRATION.md 的“默认 userdata 改用 ext4”。Unicode 支持继续保留供 Android casefold 使用，FBE/metadata encryption 未移除。
