@@ -87,3 +87,11 @@ adb shell dmesg > nabu-recovery-dmesg-verbose.log
 `tools/validate-tree.py --copy-files /tmp/nabu-fixed-copy-files.txt --check-elf-dependencies` 检查通过：1509 个复制目的地、971 项保留 blob；它检查显式过滤的库是否仍被保留 blob 的 DT_NEEDED 引用。此检查不涵盖 dlopen 字符串、固件兼容性或实机运行。正常系统启动仍需重新构建完整 ROM 后验证；本次依赖修复不会进入仅刷入 vendor_boot 的镜像。
 
 14 项恢复文件的定向构建通过，安装输出与 common blob 逐字节一致。尚未重新生成完整 ROM ZIP 或验证正常系统开机。
+
+## F2FS casefold 导致 init_user0_failed
+
+下一轮输入：`/home/dengxh/nabu_debug/nabu-pstore-verbose/`。Keymaster 4.1 和 Gatekeeper 已注册，证实恢复共享库后原启动阻塞已解除。userdata 初始化时，vold 成功创建带 casefold 的 F2FS，但内核反复报告 `Filesystem with casefold feature cannot be mounted without CONFIG_UNICODE`。`/data` 没有挂载，后续目录创建和 APEX 解压失败；init 最终报告 `Exec service failed, status 25: Rebooting into recovery, reason: init_user0_failed`。
+
+官方 sm8150 手机 defconfig 未启用 UNICODE。nabu 的 BoardConfig 通过 Lineage 原生 `KERNEL_CONFIG_OVERRIDE := CONFIG_UNICODE=y` 启用它，避免修改公共内核源码或其他设备的配置；构建会在基础片段合并后运行 oldconfig。保持现有 F2FS、casefold 和加密配置，仅重编 boot 中的内核。无需为这个修复重新格式化 userdata，也无需替换 dtbo/vendor_boot。实际启动结果仍需刷入新 boot 后确认。
+
+`m -j8 bootimage` 成功（4 分 58 秒）；生成 `.config` 确认 CONFIG_UNICODE=y，System.map 包含 utf8_load/utf8_casefold，解包确认新内核与旧 OTA 不同，嵌入 AVB hash 校验通过。测试镜像位于 `/home/dengxh/nabu_debug/boot-casefold/boot.img`，仅需更新当前槽位的 boot；正常系统开机仍待实机验证。

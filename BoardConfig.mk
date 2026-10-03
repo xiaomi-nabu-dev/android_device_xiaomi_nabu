@@ -23,6 +23,8 @@ ifneq ($(filter eng userdebug,$(TARGET_BUILD_VARIANT)),)
 BOARD_KERNEL_CMDLINE += printk.devkmsg=on
 endif
 TARGET_KERNEL_CONFIG += vendor/xiaomi/nabu.config
+# Android formats F2FS userdata with casefold; the phone defconfig omits it.
+KERNEL_CONFIG_OVERRIDE := CONFIG_UNICODE=y
 BOARD_VENDOR_BOOTIMAGE_PARTITION_SIZE := 100663296
 BOARD_CACHEIMAGE_PARTITION_SIZE :=
 BOARD_CACHEIMAGE_FILE_SYSTEM_TYPE :=
