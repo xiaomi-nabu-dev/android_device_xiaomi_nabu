@@ -131,3 +131,9 @@ mi_thermald 多次被拒绝 dac_override；日志未给出对应访问路径，�
 GPU 根目录 /devices/platform/soc/2c00000.qcom,kgsl-3d0 被 common 标为 sysfs_msm_subsys，导致 SurfaceFlinger、graphics allocator 和 SystemUI 连目录遍历都被拒绝。改为 Qualcomm 现有的 vendor_sysfs_kgsl 类型，复用已有图形访问规则，不向应用开放所有 msm subsystem 节点。该 SoC 共性修复单独提交在 common；锁定文件同步记录整合提交。
 
 selinux_policy 全套检查通过，包括 neverallow 和 Treble 策略兼容性；实机拒绝是否消失仍需新 ROM 验证。CPU/DCVS 节点的其他权限拒绝没有在本项中扩大授权。
+
+## 独立修复：音频路由 XML
+
+日志确认实际声卡是 sm8150-tavil-snd-card，HAL 加载 mixer_paths_tavil.xml 及两份 overlay。基础 tavil 配置有三份完全相同的重复路由，pahu 配置有两份；各保留首份定义。静态 overlay 的 voicemmode1/2-call handset 在 tavil 基础配置中不存在，删除这两份无效覆盖。动态 overlay 的 voice-headphones 引用了 headphones 子路径，但该 HAL 明确禁止动态 overlay 嵌套；用同一动态 headphones 路由的现有控件展开，保留 voice-headphones 的后续音量覆盖。
+
+四项配置的定向构建通过；路由唯一性、静态覆盖目标存在、动态覆盖不嵌套的结构检查已加入 validate-tree.py。没有删除 DSP1 Firmware 等实际缺失控件的声明，也未修改扬声器校准或增益；控件与内核的对应关系仍需 tinymix 和四扬声器/录音实机测试。

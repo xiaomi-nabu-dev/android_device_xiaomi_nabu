@@ -61,6 +61,24 @@ for xml in device.rglob('*.xml'):
     except ET.ParseError as error:
         errors.append(f'{xml.relative_to(device)}: {error}')
 
+# Xiaomi audio_route_ext requires unique base routes, existing static overlay
+# routes, and flat dynamic overlays. Nabu's registered card selects tavil.
+for mixer in (device / 'audio').glob('mixer_paths_*.xml'):
+    if 'overlay' in mixer.name:
+        continue
+    names = collections.Counter(node.get('name') for node in ET.parse(mixer).getroot().findall('path'))
+    for name, count in names.items():
+        if count > 1:
+            errors.append(f'Duplicate audio route in {mixer.name}: {name}')
+base_routes = {node.get('name') for node in ET.parse(device / 'audio/mixer_paths_tavil.xml').getroot().findall('path')}
+for kind in ('static', 'dynamic'):
+    overlay = ET.parse(device / f'audio/mixer_paths_overlay_{kind}.xml').getroot()
+    for route in overlay.findall('path'):
+        if route.get('name') not in base_routes:
+            errors.append(f'Unknown {kind} audio overlay route: {route.get("name")}')
+        if kind == 'dynamic' and route.findall('path'):
+            errors.append(f'Nested dynamic audio overlay route: {route.get("name")}')
+
 if args.copy_files:
     copies = collections.defaultdict(set)
     for item in args.copy_files.read_text().split():
