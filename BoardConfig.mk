@@ -31,6 +31,8 @@ TARGET_RECOVERY_FSTAB := $(DEVICE_PATH)/rootdir/etc/fstab.qcom
 TARGET_RELEASETOOLS_EXTENSIONS :=
 # Do not reserve several GiB of phone system image slack in the A/B super group.
 $(foreach p,$(call to-upper,$(ALL_PARTITIONS)),$(eval BOARD_$(p)IMAGE_PARTITION_RESERVED_SIZE := 30720000))
+# Size inode tables from the actual tree when using compact dynamic images.
+$(foreach p,$(call to-upper,$(SSI_PARTITIONS)),$(eval BOARD_$(p)IMAGE_EXTFS_INODE_COUNT :=))
 
 TARGET_SCREEN_DENSITY := 350
 TARGET_USES_QTI_CAMERA_DEVICE := true

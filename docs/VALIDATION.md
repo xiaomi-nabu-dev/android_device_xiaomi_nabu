@@ -40,3 +40,9 @@ APK 资源检查确认 6 个 nabu 特性均启用，刷新率配置为 default=1
 静态检查通过：437 项设备 blobs、788 项 common blobs、XML 和 1498 个复制目的地。common 的手机分支保留原默认路径，tablet namespace/策略仅由 TARGET_IS_TABLET 选择。
 
 本次更换了 Power HAL，CPU/GPU hint、热策略、功耗及正常系统的笔/键盘/UI 行为仍需实机验证。日志：/tmp/nabu-shared-check/。
+
+## product 镜像空间修复
+
+完整构建在 target-files 的 product.img 生成阶段失败：460 MiB 文件树加约 29 MiB 预留空间，但继承的 `product_extfs_inode_count=-1` 让 mke2fs 创建了 125312 个 inode，inode 表与文件系统元数据耗尽了预留空间。nabu 侧清空 product/system/system_ext 的显式 inode 数，让 build_image 按实际文件树计算；common 保持原配置。
+
+构建变量解析确认三个 inode 设置为空、预留空间仍为 30720000 字节。使用失败构建的 PRODUCT 文件树、filesystem_config 和 SELinux contexts，单独生成 product.img 成功（包括 AVB hashtree/footer）；最终文件系统 640 个 inode，剩余 7180 个 4 KiB block。验证产物位于 `/tmp/nabu-product-inodes-check/`，尚未重新完成完整 ROM/OTA 打包。
