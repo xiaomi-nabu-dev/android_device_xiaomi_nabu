@@ -1,0 +1,16 @@
+//
+// Copyright (C) 2021 The LineageOS Project
+//
+// SPDX-License-Identifier: Apache-2.0
+//
+
+cc_library_static {
+    name: "init_nabu",
+    recovery_available: true,
+    srcs: ["init_nabu.cpp"],
+    shared_libs: ["libbase"],
+    include_dirs: [
+        "system/core/init",
+        "system/libbase/include"
+    ]
+}
