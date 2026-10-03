@@ -192,3 +192,14 @@ persist.vendor.btstack.enable.twsplussho=true
 
 # Reinitialize the panel when recovery takes over from the bootloader.
 ro.recovery.ui.blank_unblank_on_init=true
+
+# Shared tablet hardware control: paths belong to this device.
+ro.vendor.sm8150.tablet.keyboard_node=/sys/devices/platform/soc/soc:xiaomi_keyboard/xiaomi_keyboard_enabled
+ro.vendor.sm8150.tablet.stylus_node=/sys/touchpanel/pen
+ro.vendor.sm8150.tablet.double_tap_node=/sys/touchpanel/double_tap
+
+# Power HAL interaction tuning for nabu; avoid relying on a display idle poll node.
+vendor.powerhal.disp.idle_support=false
+vendor.powerhal.interaction.min=100
+vendor.powerhal.interaction.max=1500
+vendor.powerhal.interaction.offset=0

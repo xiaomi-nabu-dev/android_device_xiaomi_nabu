@@ -14,3 +14,11 @@ prebuilt_etc {
     filename: "init.nabu.debug.rc",
     sub_dir: "init",
 }
+
+android_library {
+    name: "nabu_tablet_settings_config",
+    static_libs: ["//device/xiaomi/sm8150-common/tablet:sm8150_tablet_settings_defaults"],
+    resource_dirs: ["configs/tablet-settings/res"],
+    manifest: "configs/tablet-settings/AndroidManifest.xml",
+    platform_apis: true,
+}

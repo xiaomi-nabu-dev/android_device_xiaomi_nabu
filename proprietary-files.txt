@@ -576,5 +576,3 @@ vendor/lib64/libwvkeybox.so
 # Xiaomi MAC
 
 # Nabu perf service client (LOS 20 has no source libqti-perfd-client).
-vendor/lib/libqti-perfd-client.so
-vendor/lib64/libqti-perfd-client.so

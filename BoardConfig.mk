@@ -1,6 +1,7 @@
 # Copyright (C) 2026 The LineageOS Project
 # SPDX-License-Identifier: Apache-2.0
 
+TARGET_USES_DEVICE_ROOTDIR := true
 include device/xiaomi/sm8150-common/BoardConfigCommon.mk
 DEVICE_PATH := device/xiaomi/nabu
 TARGET_OTA_ASSERT_DEVICE := nabu
@@ -37,8 +38,6 @@ TARGET_INIT_VENDOR_LIB := //$(DEVICE_PATH):init_nabu
 TARGET_RECOVERY_DEVICE_MODULES := init_nabu
 TARGET_FS_CONFIG_GEN := $(DEVICE_PATH)/config.fs
 TARGET_TAP_TO_WAKE_NODE := "/sys/touchpanel/double_tap"
-TARGET_USES_NON_LEGACY_POWERHAL := true
-TARGET_USES_INTERACTION_BOOST := true
 
 TARGET_PRODUCT_PROP += $(DEVICE_PATH)/product.prop
 TARGET_SYSTEM_PROP += $(DEVICE_PATH)/system.prop

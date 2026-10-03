@@ -28,3 +28,15 @@
 设备树清理后，m nothing、selinux_policy、6 个复用 common 的启动脚本定向构建、framework_compatibility_matrix.device.xml，以及 blob/XML/PRODUCT_COPY_FILES 检查通过。6 个安装脚本与 common 原文件逐字节一致，权限均为 0755。笔、键盘、双击唤醒、recovery 显示和调试 ADB 配置继续保留。
 
 清理验证日志：/tmp/nabu-cleanup-check/。此前的完整 ROM 和实机硬件验证记录仍按当时范围解读。
+
+## 共享平板实现整合
+
+设备树由 278 个文件减至 124 个。公共设置应用、翻译与 hwcontrol 服务放在 common/tablet；节点、特性开关、音效 UUID、热策略值和刷新率保留在 nabu 配置。旧 Power HAL 移除，使用官方 Xiaomi libperfmgr 服务和 nabu powerhint.json。
+
+实际编译通过：XiaomiTabletSettings、custom.hardware.hwcontrol-service、android.hardware.power-service.xiaomi-libperfmgr、libqti-perfd-client、selinux_policy、common 启动脚本、框架兼容矩阵，以及 bootimage/dtboimage/vendorbootimage。
+
+APK 资源检查确认 6 个 nabu 特性均启用，刷新率配置为 default=120 / standard=60 / extreme=120，热策略节点和音效 UUID 来自 nabu。未提供配置的 common 默认库关闭所有设备特性。安装的 6 个 common 启动脚本与源文件一致，均可执行；安装的 powerhint.json 与 nabu 文件一致。
+
+静态检查通过：437 项设备 blobs、788 项 common blobs、XML 和 1498 个复制目的地。common 的手机分支保留原默认路径，tablet namespace/策略仅由 TARGET_IS_TABLET 选择。
+
+本次更换了 Power HAL，CPU/GPU hint、热策略、功耗及正常系统的笔/键盘/UI 行为仍需实机验证。日志：/tmp/nabu-shared-check/。

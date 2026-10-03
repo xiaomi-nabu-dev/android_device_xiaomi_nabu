@@ -1,100 +1,67 @@
-# nabu：LineageOS 20 / 官方 sm8150-common 拆分
+# nabu：LineageOS 20 / sm8150-common
 
-实现目录：`/home/dengxh/android2/lineage`。原目录 `/home/dengxh/android/lineage/device/xiaomi/nabu` 未修改。
+源码目录：/home/dengxh/android2/lineage。原 /home/dengxh/android/lineage 设备树未修改。
 
-## 基线与选择
+## 当前分工
 
-| 目录 | 上游 / 分支 | 本地修改 |
-| --- | --- | --- |
-| device/xiaomi/sm8150-common | LineageOS / lineage-20 | 平板继承开关、可选 vendor 产品入口与 Wi-Fi overlay、平板属性 |
-| kernel/xiaomi/sm8150 | LineageOS / lineage-22.2 | 无源码修改，工作分支名 nabu-los20 |
-| vendor/xiaomi/sm8150-common | TheMuppets / lineage-20 | 无修改 |
-| hardware/xiaomi | LineageOS / lineage-20 | 无修改 |
-| device/xiaomi/nabu | dev-harsh1998 / lineage-20 | 拆分后的 nabu 设备树 |
-| vendor/xiaomi/nabu | dev-harsh1998 / lineage-20 | 仅保留 nabu 专有文件并重新生成构建文件 |
+| 实现/数据 | 位置 |
+| --- | --- |
+| SoC 产品、公共 HAL、通用启动脚本与策略 | sm8150-common / hardware/xiaomi |
+| 可配置的平板设置 UI、多语言资源、hwcontrol AIDL 服务 | sm8150-common/tablet |
+| Power HAL | hardware/xiaomi 的官方 Xiaomi libperfmgr 实现 |
+| 功能开关、音效 UUID、热策略节点/值、刷新率及图标 | nabu/configs/tablet-settings |
+| CPU/GPU/总线 hint 节点和参数 | nabu/configs/powerhint.json |
+| 笔/键盘/双击唤醒节点路径 | nabu/vendor.prop |
+| 硬件节点标签、访问权限和 init 所有权 | nabu/sepolicy / rootdir |
+| 虚拟 A/B、vendor_boot recovery、fstab、设备身份、四扬声器、overlay、Wi-Fi 差异 | nabu |
 
-精确上游基线提交见 `upstream-lock.json`。现有目录是独立 Git checkout，已补齐所有远程分支和标签的历史。nabu 设备树、nabu vendor 以及 common 兼容改动分别提交在本地 `nabu-los20` 分支，尚未推送；使用各目录的 `git log` 和 `git show` 审阅。
+common 的设置实现没有写死 nabu 路径或刷新率。设备通过一个资源 android_library 提供配置，继承默认库后按需覆盖。节点通过只读 ro.vendor.sm8150.tablet.* 属性传给服务；实际 sysfs 标签/权限仍由设备定义。
 
-官方内核没有 lineage-20 分支，lineage-19.1 又缺少 nabu 驱动和配置。使用已有 nabu 支持的 lineage-22.2 内核，Android 用户空间仍是 13 / LOS 20。内核配置沿用 sm8150-perf_defconfig + sm8150-common.config + nabu.config；配置生成、内核及 boot/dtbo/vendor_boot 定向编译已通过，用户已确认 recovery 可以启动；完整 Android 系统仍需验证。
+TARGET_USES_DEVICE_ROOTDIR 仅禁用被设备覆盖的 common 启动模块，公共脚本、库与 namespace 正常复用。手机默认实现不选入 tablet namespace 或 tablet SELinux。
 
-common blobs 使用实际存在的 lineage-20 分支，而不是题目给出的 lineage-21。22.2 的第三方拆分树仅用于核对拆分思路和音频重命名；没有整体回退其 Android 15 配置。
+TARGET_POWER_HINT_CONFIG 指向设备 JSON，手机未设置时仍使用原 common JSON。nabu 使用旧设备树中已有的 nabu hint 数据，并采用设备自己的交互持续时间设置。此次替换了旧 Power HAL，功耗和性能行为需要正常 Android 系统实机验证。
 
-## 拆分边界
+## 基线
 
-common 继续提供 Qualcomm 音频接口、图形、蓝牙、相机 provider、传感器接口、Wi-Fi、共享 blobs 和通用 SELinux。common 的手机产品保持默认路径；nabu 设置 TARGET_IS_TABLET，并显式选用自己的 vendor 包装文件和 Wi-Fi overlay。
+设备与 common/vendor/hardware 的上游基线仍见 upstream-lock.json。common、nabu DT 和 nabu vendor 的适配提交分别在本地 nabu-los20 分支。必须使用包含 shared tablet 支持的 common checkout；旧的单独小补丁已经不足以恢复完整实现，见 patches/README.md。
 
-nabu 保留：
+官方内核没有 lineage-20 分支，lineage-19.1 缺少 nabu 支持。使用官方 lineage-22.2 的 Linux 4.14.356，用户空间为 Android 13。内核与 boot/dtbo/vendor_boot 已实际编译，用户确认 recovery 启动成功；完整 Android 系统仍需实机验证。
 
-- 虚拟 A/B、boot header v3、vendor_boot 中的 recovery、nabu fstab 和 OTA 分区清单。
-- 2560×1600 平板配置、350 dpi、nabu RRO、设备身份和初始化。
-- 四扬声器音频 HAL、功放固件和校准，nabu 相机、传感器、热管理、性能服务配置。
-- 平板设置、键盘和笔控制、nabu Power HAL 与设备 SELinux 增量。
+common blobs 使用 TheMuppets lineage-20。nabu 专有清单保留硬件差异，不重复 common 文件；libqti-perfd-client 改为使用 common 的源码实现。音频仍使用 nabu 的四扬声器 HAL及其固件/校准。
 
-不导出 common 的手机 rootdir Soong namespace，避免同名安装目标覆盖 nabu 启动文件。common-vendor.mk 包装上游 vendor 产品文件，过滤手机 RIL/IMS、GNSS、FM、支付和升降摄像头文件；没有修改上游 common vendor 仓库。
-
-nabu 专有列表保留 439 项，按最终安装路径去重，与 common 不重叠。
-
-相机使用 hardware/xiaomi 自带的 libMegviiFacepp-0.5.2 / libmegface 兼容桩和 Lineage 的 libpiex_shim；避免旧 blob 副本与现有源码模块的安装冲突。实际相机功能仍需实机验证。LOS 20 当前 hardware/qcom-caf/common 没有 source libqti-perfd-client，nabu 保留原来的两个架构的专有客户端。
-
-音频 HAL 重命名为 audio.primary.nabu.so，并设置 ro.hardware.audio=nabu；它动态加载的 offload 库改名为 liba2dpoffload_nabu.so，避免覆盖共享实现。extract-files.sh 内的修复函数保证后续提取能重现此变更。
-
-官方内核控制接口与旧树不同，已调整：
-
-- 双击唤醒：`/sys/touchpanel/double_tap`。
-- 笔输入：`/sys/touchpanel/pen`。
-- 键盘启用：`/sys/devices/platform/soc/soc:xiaomi_keyboard/xiaomi_keyboard_enabled`，读写数值 0/1。
-
-控制服务安装到 system_ext，与设备 SELinux 所在分区一致；init 服务路径、节点所有权和标签同步调整。OTA 使用 payload 中的分区清单，不再使用旧的非 A/B Edify 写入未带槽后缀的分区。
-
-## 编译与维护
+## 构建
 
 ```bash
 cd /home/dengxh/android2/lineage
 source build/envsetup.sh
 breakfast nabu
-brunch nabu
+mka bacon -j8
 ```
 
-需要自行限制并行数时，breakfast 之后运行 `mka bacon -j8`。不要把 `-j8` 当作 breakfast/brunch 的设备 variant 参数。
-
-仅检查完整构建图（不编译 ROM）：
+定向检查公共实现：
 
 ```bash
-m nothing
-NINJA_ARGS=-n brunch nabu
+m -j8 XiaomiTabletSettings custom.hardware.hwcontrol-service android.hardware.power-service.xiaomi-libperfmgr selinux_policy
 ```
 
 静态检查：
 
 ```bash
-python3 device/xiaomi/nabu/tools/validate-tree.py
 get_build_var PRODUCT_COPY_FILES > /tmp/nabu-copy-files.txt
 python3 device/xiaomi/nabu/tools/validate-tree.py --copy-files /tmp/nabu-copy-files.txt
 ```
 
-重新提取 nabu blobs 时，只操作 nabu vendor：
+只提取设备 blobs：
 
 ```bash
 bash device/xiaomi/nabu/extract-files.sh /path/to/nabu/dump
 bash device/xiaomi/nabu/setup-makefiles.sh
 ```
 
-共享 blobs 继续使用锁定的 TheMuppets common checkout；不要从单一 nabu dump 盲目覆盖 common 中来自其他固件的固定版本。
+共享 blobs 使用锁定的 common checkout，避免由单一 nabu dump 替换公共固定版本。提取脚本继续修复 nabu audio/offload 库的名称和依赖。
 
-common 的补丁保存在 `patches/sm8150-common-lineage-20-tablet.patch`。在 upstream-lock.json 对应的干净 common checkout 中可以 `git apply --check` 后应用。更新 common 时应同步检查此补丁和 common-vendor.mk 的过滤目的地，再重新做构建图验证。
+## 历史与验证
 
-## 验证范围
+以原 43eca20 为终点的 616 个旧提交已压成一个根快照；之后的移植、recovery 修复、ADB 调试、清理与公共实现整合分别提交。原始历史在源码树外 Git bundle 中保留，上游远程分支用于溯源。
 
-最终执行记录见 `VALIDATION.md`。配置选择、构建图和静态检查不能证明设备可以开机；完整编译、刷机与实机功能验证尚未进行。特别需要验证 recovery/解密、OTA 槽切换、触控和笔、键盘、120 Hz、四扬声器、相机、传感器、Wi-Fi/蓝牙、充电与待机功耗。
-
-## 设备树清理与新根历史
-
-337 个设备树文件清理为 278 个，删除 59 个文件：34 个仅含注释的 SELinux 文件，未选用的 RemovePackages、powerhint、旧提取排序工具、空 odm 属性和非 A/B release hook，以及已由 common 提供的重复文件。
-
-6 个完全相同的启动脚本改为直接从 common 构建，保留原 nabu 模块名、安装路径和可执行权限；4 个共享音频文件、P2P 配置和设备兼容矩阵也直接复用 common。nabu 仍保留 early_boot/post_boot 差异脚本、虚拟 A/B fstab、四扬声器配置、平板 overlay 和硬件控制服务。
-
-旧 TouchFeature HIDL 服务没有选入产品，也没有对应的 proprietary provider。当前笔和双击唤醒由 hwcontrol AIDL 访问官方内核 sysfs，所以移除了过时的 HIDL manifest/matrix 要求、/dev/xiaomi-touch 标签和 ioctl 策略。Wi-Fi 平板遗留的 radio/IMS 属性同时移除。
-
-剩余文件中，parts 有 123 个文件（设置界面、服务和多语言资源），audio 17 个，sepolicy 39 个，rootdir 14 个；这些仍有实际用途，不以文件名或数量为依据删除。
-
-以 43eca20 为终点的 616 个旧提交合为一个初始根快照，之后的移植、recovery 显示修复和 ADB 调试提交保持各自独立，最后追加本次清理提交。原始基线 SHA 继续保存在 upstream-lock.json 中供溯源；旧历史保存在源码树外的 Git bundle，远程 upstream 分支仍作为参考。
+此前从 337 清理到 278 个文件，本次进一步把可配置公共实现移入 common，设备树主要保留数据和硬件差异。当前验证结果见 VALIDATION.md；recovery/ADB 调试说明见 DEBUGGING.md。

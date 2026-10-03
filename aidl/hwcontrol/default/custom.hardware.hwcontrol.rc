@@ -1,5 +1,0 @@
-# SPDX-License-Identifier: Apache-2.0
-service hw-hal-aidl /system_ext/bin/custom.hardware.hwcontrol-service
-    class hal
-    user system
-    group system input uhid

@@ -2,6 +2,10 @@
 # SPDX-License-Identifier: Apache-2.0
 
 TARGET_IS_TABLET := true
+TARGET_POWER_HINT_CONFIG := $(LOCAL_PATH)/configs/powerhint.json
+SOONG_CONFIG_NAMESPACES += XIAOMI_SM8150_TABLET
+SOONG_CONFIG_XIAOMI_SM8150_TABLET := settings_config
+SOONG_CONFIG_XIAOMI_SM8150_TABLET_settings_config := //device/xiaomi/nabu:nabu_tablet_settings_config
 TARGET_COMMON_VENDOR_PRODUCT := device/xiaomi/nabu/common-vendor.mk
 TARGET_WIFI_OVERLAY := NabuWifiOverlay
 TARGET_IS_VAB := true
@@ -25,7 +29,6 @@ AB_OTA_POSTINSTALL_CONFIG += RUN_POSTINSTALL_system=true POSTINSTALL_PATH_system
 AB_OTA_POSTINSTALL_CONFIG += RUN_POSTINSTALL_vendor=true POSTINSTALL_PATH_vendor=bin/checkpoint_gc FILESYSTEM_TYPE_vendor=ext4 POSTINSTALL_OPTIONAL_vendor=true
 PRODUCT_PACKAGES_DEBUG += bootctl
 PRODUCT_PACKAGES += libpiex_shim android.hardware.thermal@2.0-service.qti
-PRODUCT_PACKAGES += android.hardware.power-service-nabu
 PRODUCT_COPY_FILES += $(call find-copy-subdir-files,*,$(LOCAL_PATH)/audio/,$(TARGET_COPY_OUT_VENDOR)/etc)
 
 # Unchanged SoC audio configuration comes from common.
@@ -43,7 +46,7 @@ PRODUCT_COPY_FILES += frameworks/native/data/etc/android.software.managed_users.
 
 PRODUCT_COPY_FILES += $(LOCAL_PATH)/rootdir/etc/fstab.qcom:$(TARGET_COPY_OUT_VENDOR)/etc/fstab.qcom
 PRODUCT_COPY_FILES += $(LOCAL_PATH)/rootdir/etc/fstab.qcom:$(TARGET_COPY_OUT_VENDOR_RAMDISK)/first_stage_ramdisk/fstab.qcom
-PRODUCT_PACKAGES += nabu_init.class_main.sh nabu_init.qcom.class_core.sh nabu_init.qcom.early_boot.sh nabu_init.qcom.post_boot.sh nabu_init.qcom.sh nabu_init.qcom.usb.sh nabu_init.qti.chg_policy.sh nabu_init.qti.dcvs.sh
+PRODUCT_PACKAGES += init.class_main.sh init.qcom.class_core.sh nabu_init.qcom.early_boot.sh nabu_init.qcom.post_boot.sh init.qcom.sh init.qcom.usb.sh init.qti.chg_policy.sh init.qti.dcvs.sh
 PRODUCT_PACKAGES += nabu_init.qcom.power.rc nabu_init.qcom.rc nabu_init.qcom.usb.rc nabu_init.recovery.qcom.rc nabu_init.target.rc nabu_init.xiaomi.rc nabu_ueventd.qcom.rc nabu_init.nabu.perf.rc
 PRODUCT_COPY_FILES += device/xiaomi/sm8150-common/wifi/p2p_supplicant_overlay.conf:$(TARGET_COPY_OUT_VENDOR)/etc/wifi/p2p_supplicant_overlay.conf
 PRODUCT_COPY_FILES += $(LOCAL_PATH)/wifi/wpa_supplicant_overlay.conf:$(TARGET_COPY_OUT_VENDOR)/etc/wifi/wpa_supplicant_overlay.conf
@@ -58,7 +61,6 @@ PRODUCT_COPY_FILES += frameworks/av/services/audiopolicy/config/default_volume_t
 PRODUCT_COPY_FILES += frameworks/av/services/audiopolicy/config/r_submix_audio_policy_configuration.xml:$(TARGET_COPY_OUT_VENDOR)/etc/r_submix_audio_policy_configuration.xml
 PRODUCT_COPY_FILES += frameworks/av/services/audiopolicy/config/usb_audio_policy_configuration.xml:$(TARGET_COPY_OUT_VENDOR)/etc/usb_audio_policy_configuration.xml
 
-PRODUCT_PACKAGES += XiaomiPad5Settings custom.hardware.hwcontrol-service
 
 # Use the upstream Xiaomi camera compatibility stubs.
 PRODUCT_PACKAGES += libMegviiFacepp-0.5.2 libmegface
