@@ -23,7 +23,7 @@ TARGET_POWER_HINT_CONFIG 指向设备 JSON，手机未设置时仍使用原 comm
 
 ## 基线
 
-设备与 common/vendor/hardware 的上游基线仍见 upstream-lock.json。common、nabu DT 和 nabu vendor 的适配提交分别在本地 nabu-los20 分支。必须使用包含 shared tablet 支持的 common checkout；旧的单独小补丁已经不足以恢复完整实现，见 patches/README.md。
+设备与 common/vendor/hardware 的上游基线仍见 [upstream-lock.json](../upstream-lock.json)。common、nabu DT 和 nabu vendor 的适配提交分别在本地 nabu-los20 分支；common 所需的本地整合提交也单独记录在锁定文件中。必须使用包含 shared tablet 支持的 common checkout。完整实现通过 Git 提交维护，原先的独立小补丁已经移除，不再需要 patches/ 目录。发布可复用的 manifest 时，应指向包含该整合提交的 common fork。
 
 官方内核没有 lineage-20 分支，lineage-19.1 缺少 nabu 支持。使用官方 lineage-22.2 的 Linux 4.14.356，用户空间为 Android 13。内核与 boot/dtbo/vendor_boot 已实际编译，用户确认 recovery 启动成功；完整 Android 系统仍需实机验证。
 
@@ -62,6 +62,6 @@ bash device/xiaomi/nabu/setup-makefiles.sh
 
 ## 历史与验证
 
-以原 43eca20 为终点的 616 个旧提交已压成一个根快照；之后的移植、recovery 修复、ADB 调试、清理与公共实现整合分别提交。原始历史在源码树外 Git bundle 中保留，上游远程分支用于溯源。
+以原 43eca20 为终点的 616 个旧提交已压成一个根快照；之后的移植、recovery 修复、ADB 调试、清理与公共实现整合分别提交。原始历史及整合前的仓库快照在源码树外 `/home/dengxh/android2/nabu-dt-backups/` 的 Git bundle 中保留，上游远程分支用于溯源。
 
-此前从 337 清理到 278 个文件，本次进一步把可配置公共实现移入 common，设备树主要保留数据和硬件差异。当前验证结果见 VALIDATION.md；recovery/ADB 调试说明见 DEBUGGING.md。
+此前从 337 清理到 278 个文件，本次进一步把可配置公共实现移入 common，设备树主要保留数据和硬件差异。当前验证结果见 [VALIDATION.md](VALIDATION.md)；recovery/ADB 调试说明见 [DEBUGGING.md](DEBUGGING.md)。

@@ -22,6 +22,6 @@ Display | IPS LCD, 1B colors, 120Hz, HDR10, Dolby Vision
 ![Xiaomi Mi Pad 5](https://cdn.cnbj0.fds.api.mi-img.com/b2c-shopapi-pms/pms_1628600350.1553788.png "Xiaomi Mi Pad 5")
 ## LineageOS 20 common split
 
-See [MIGRATION.md](MIGRATION.md) for the upstream layout and build instructions, and [VALIDATION.md](VALIDATION.md) for completed checks.
+See [MIGRATION.md](docs/MIGRATION.md) for the upstream layout and build instructions, and [VALIDATION.md](docs/VALIDATION.md) for completed checks.
 
-See [DEBUGGING.md](DEBUGGING.md) for recovery display initialization and early USB ADB on debugging builds.
+See [DEBUGGING.md](docs/DEBUGGING.md) for recovery display initialization and early USB ADB on debugging builds.
