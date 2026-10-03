@@ -113,3 +113,15 @@ Wi-Fi HAL 写驱动状态返回 Invalid argument；随后内核在约 48 秒记�
 恢复文件的 ELF 依赖检查通过（1514 个复制目的地、976 项保留 blob）；服务及设备 init 的 host_init_verifier 检查通过，现有 SELinux file_contexts 已有 vendor_rmt_storage_exec/vendor_rfs_access_exec 标签。缺失服务是明确的集成问题，与 modem panic 的关联仍需新 ROM 实机确认；没有修改 SSR 重启级别来隐藏崩溃。
 
 五项恢复文件及最终 init.target.rc 的定向构建通过；输出与源文件一致。完整 ROM 重新打包与 Wi-Fi 实机复测交由用户进行。
+
+## 独立修复：清除旧 Perf/IOP 服务
+
+logcat 显示 perf-hal-2-2 因缺少 vendor.qti.hardware.perf@2.0.so 循环退出，iop-hal-2-0 因缺少 perf_wait_get_prop 符号循环退出，并反复触发 sys.init.updatable_crashing。当前 common 使用 libqti-perfd-client stub 和 libperfmgr Power HAL；旧 daemon 与这个方案不兼容。移除旧 Perf/IOP 的两个服务程序、两个 rc 和设备 manifest 声明；其余客户端库暂时保留，避免破坏保留组件的依赖。nabu vendor 以独立提交记录对应生成文件/资源删除，锁定文件同步记录。
+
+433 项 nabu blobs 的静态检查、m nothing 和设备 framework compatibility matrix 构建通过。实际性能行为仍需新 ROM 实机测试。
+
+## 待办：Thermal HAL 与 mi_thermald
+
+用户要求先记录待核实项。Thermal HAL 的最早错误是 No thermal zone for sensor: xo-therm；初始化在此中止，Android 无法读取温度和阈值。nabu DTS 的 VADC/ADC-TM 配置使用 xo_therm，但实际注册到 /sys/class/thermal/thermal_zone*/type 的名称仍需实机确认，不能只据 DTS 改 HAL 映射。待采集各 zone 的 type/temp，再确认修复位置。
+
+mi_thermald 多次被拒绝 dac_override；日志未给出对应访问路径，需核对实际节点的 owner/group/mode 后调整具体权限，暂不授予泛用的 DAC 绕过能力。ThermalEngine 还有旧节点不存在和部分 sensor 初始化失败，需要与当前内核节点对照。
