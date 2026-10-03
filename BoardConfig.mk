@@ -18,6 +18,10 @@ BOARD_BOOT_HEADER_VERSION := 3
 BOARD_KERNEL_IMAGE_NAME := Image.gz
 BOARD_MKBOOTIMG_ARGS := --header_version $(BOARD_BOOT_HEADER_VERSION)
 BOARD_KERNEL_CMDLINE += kpti=off
+# Preserve early init/service errors in pstore during bring-up.
+ifneq ($(filter eng userdebug,$(TARGET_BUILD_VARIANT)),)
+BOARD_KERNEL_CMDLINE += printk.devkmsg=on
+endif
 TARGET_KERNEL_CONFIG += vendor/xiaomi/nabu.config
 BOARD_VENDOR_BOOTIMAGE_PARTITION_SIZE := 100663296
 BOARD_CACHEIMAGE_PARTITION_SIZE :=

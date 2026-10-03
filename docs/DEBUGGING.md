@@ -60,3 +60,20 @@ adb pull /tmp/recovery.log nabu-recovery.log
 - 尚未确认实机 recovery 显示和 USB 连接行为。
 
 日志目录：`/tmp/nabu-debug-check/`。
+
+## 首次正常系统启动失败（2026-10-03）
+
+输入日志：`/home/dengxh/nabu_debug/`。console-ramoops-0 显示逻辑分区挂载后进入 second-stage init，apexd bootstrap 已执行，之后持续等待 `android.system.keystore2.IKeystoreService/default`；pmsg 同时出现等待 `android.hardware.keymaster@4.0::IKeymasterDevice/default` 的记录。这证明启动被加密服务依赖阻塞，但尚不能区分服务启动失败、崩溃或固件通信问题。4.1 Keymaster 也实现 4.0 接口，不能仅凭等待日志中的 4.0 就修改 manifest。
+
+原 console 中大量 init/apexd 日志被 `/dev/kmsg` 限流丢弃，pmsg 的早期日志被 sscrpcd 重复错误覆盖。userdebug/eng 的 kernel cmdline 增加 `printk.devkmsg=on`，保留早期 init 与服务错误；user 构建不添加。此改动仅增强取证，尚未修复或实机验证启动问题。
+
+header v3 的内核命令行位于 vendor_boot，而非 boot；重新生成的日志 vendor_boot 可以单独刷入当前槽位，不需要替换 dtbo 或重编完整 ROM。尝试启动约 15 秒后直接强制重启进 recovery，尽快取回 pstore，避免重复启动覆盖日志：
+
+```bash
+adb pull /sys/fs/pstore nabu-pstore-verbose
+adb shell dmesg > nabu-recovery-dmesg-verbose.log
+```
+
+下一轮重点检查 Keymaster、qseecomd、keystore2 的启动/退出记录，以及 vold 和 mount_all 的阻塞位置。
+
+定向构建 bootimage 和 vendorbootimage 均通过。解包确认 `vendor_boot` 命令行含 `printk.devkmsg=on`，boot/vendor_boot 的嵌入 AVB hash 校验通过；内核与已生成完整 OTA 的 boot 内核 SHA256 相同。测试镜像和说明位于 `/home/dengxh/nabu_debug/boot-verbose/`，本次只需刷入其中的 `vendor_boot-debug.img`。
