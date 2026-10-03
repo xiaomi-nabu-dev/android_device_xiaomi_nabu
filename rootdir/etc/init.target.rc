@@ -28,13 +28,8 @@
 #
 
 on early-init
-    exec u:r:vendor_modprobe:s0 -- /vendor/bin/modprobe -a -d /vendor/lib/modules audio_wglink audio_q6_pdr audio_q6_notifier audio_apr audio_adsp_loader audio_q6 audio_native audio_usf audio_pinctrl_wcd audio_swr audio_platform audio_hdmi audio_wcd_spi audio_stub audio_wcd_core audio_wsa881x audio_wcd9360 audio_hdmi audio_cs35l41 audio_tas2557 audio_tas256x audio_tfa98xx audio_machine_msmnile
     write /proc/sys/kernel/sched_boost 1
     symlink /data/tombstones /tombstones
-
-on early-init
-    # Start audio adsp rpc daemon at early init stage
-    start vendor.audioadsprpcd_audiopd
 
 on init
     write /dev/stune/foreground/schedtune.sched_boost_no_override 1
@@ -101,9 +96,6 @@ on fs && property:ro.build.ab_update=true
 on post-fs
     # set RLIMIT_MEMLOCK to 64MB
     setrlimit 8 67108864 67108864
-
-    start vendor.spdaemon
-    start vendor.sec_nvm
 
 on late-fs
     wait_for_prop hwservicemanager.ready true
@@ -205,9 +197,6 @@ on boot && property:persist.vendor.usb.controller.default=*
 on property:vendor.usb.controller=*
     setprop sys.usb.controller ${vendor.usb.controller}
 
-#Load WLAN driver
-    insmod /vendor/lib/modules/qca_cld3_wlan.ko
-
 #pd-mapper
 service vendor.pd_mapper /vendor/bin/pd-mapper
     class core
@@ -238,10 +227,8 @@ on charger
     chown root system /mnt/vendor/persist
     chmod 0771 /mnt/vendor/persist
     mkdir /mnt/vendor/persist/subsys 0770 root system
-    start vendor.power_off_alarm
     setprop sys.usb.controller a600000.dwc3
     setprop sys.usb.configfs 1
-    start leds-sh
 
 service vendor.thermal-engine /vendor/bin/thermal-engine
    class main
@@ -252,29 +239,10 @@ service vendor.thermal-engine /vendor/bin/thermal-engine
    socket thermal-send-rule stream 0660 system system
    group root
 
-service vendor.mdm_helper /vendor/bin/mdm_helper
-    class core
-    group system wakelock
-    disabled
-
-service vendor.mdm_launcher /vendor/bin/sh /vendor/bin/init.mdm.sh
-    class main
-    oneshot
-
 service vendor.energy-awareness /vendor/bin/energy-awareness
     class main
     user system
     group system
-    oneshot
-
-service panel-info-sh /system/vendor/bin/sh /vendor/etc/init.panel_info.sh
-    class core
-    user root
-    oneshot
-
-service leds-sh /system/vendor/bin/sh /vendor/etc/init.leds.sh
-    class core
-    user root
     oneshot
 
 service nv_mac /vendor/bin/nv_mac
@@ -349,7 +317,6 @@ service remosaic_daemon /system/vendor/bin/remosaic_daemon
    class late_start
    user camera
    group camera
-
 
 on post-fs-data
     chmod 0666 /dev/migt

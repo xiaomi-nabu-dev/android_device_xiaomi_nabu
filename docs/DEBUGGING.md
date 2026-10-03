@@ -137,3 +137,9 @@ selinux_policy 全套检查通过，包括 neverallow 和 Treble 策略兼容性
 日志确认实际声卡是 sm8150-tavil-snd-card，HAL 加载 mixer_paths_tavil.xml 及两份 overlay。基础 tavil 配置有三份完全相同的重复路由，pahu 配置有两份；各保留首份定义。静态 overlay 的 voicemmode1/2-call handset 在 tavil 基础配置中不存在，删除这两份无效覆盖。动态 overlay 的 voice-headphones 引用了 headphones 子路径，但该 HAL 明确禁止动态 overlay 嵌套；用同一动态 headphones 路由的现有控件展开，保留 voice-headphones 的后续音量覆盖。
 
 四项配置的定向构建通过；路由唯一性、静态覆盖目标存在、动态覆盖不嵌套的结构检查已加入 validate-tree.py。没有删除 DSP1 Firmware 等实际缺失控件的声明，也未修改扬声器校准或增益；控件与内核的对应关系仍需 tinymix 和四扬声器/录音实机测试。
+
+## 独立修复：无效启动项
+
+当前内核将声卡与 WLAN 驱动内建，日志也确认声卡注册和 WLAN 驱动加载；移除针对不存在 audio_* 与 qca_cld3_wlan.ko 模块文件的旧 modprobe/insmod。删除无定义的 audioadsprpcd_audiopd、spdaemon、sec_nvm 启动请求，以及缺失的 USB 测试、panel-info、LED 和外置 mdm helper/launcher 脚本调用或服务。它们此前均无法执行；保留已恢复的 modem storage/TFTP、pm-proxy、PD mapper 和 QRTR 服务。
+
+两份 rc 的 host_init_verifier 和定向构建通过。没有改动系统 audioserver.rc 中兼容不同设备的可选 HAL 启动请求。
