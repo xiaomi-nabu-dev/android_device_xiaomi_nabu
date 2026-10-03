@@ -4,12 +4,18 @@ from pathlib import Path
 import argparse
 import collections
 import re
+import subprocess
+import concurrent.futures
 import sys
 import xml.etree.ElementTree as ET
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--copy-files', type=Path, help='Expanded PRODUCT_COPY_FILES from get_build_var')
+parser.add_argument('--check-elf-dependencies', action='store_true',
+                    help='Check that retained blobs do not need explicitly filtered libraries (requires --copy-files and readelf)')
 args = parser.parse_args()
+if args.check_elf_dependencies and not args.copy_files:
+    parser.error('--check-elf-dependencies requires --copy-files')
 device = Path(__file__).resolve().parents[1]
 root = device.parents[2]
 errors = []
@@ -72,6 +78,45 @@ if args.copy_files:
             else:
                 print(f'Upstream duplicate copy destination (first entry wins): {target}')
     print(f'PRODUCT_COPY_FILES: {len(copies)} destinations')
+    if args.check_elf_dependencies:
+        # Phone-only filtering must not remove a shared library used by a
+        # retained HAL. Keep this scoped to explicit exclusions: framework
+        # and source-built library dependencies are resolved by Soong.
+        excluded = re.findall(
+            r'\$\(TARGET_COPY_OUT_(VENDOR|SYSTEM_EXT)\)(/[^\s]+\.so)',
+            (device / 'common-vendor.mk').read_text())
+        filtered = {}
+        for partition, suffix in excluded:
+            target = partition.lower() + suffix
+            if target not in copies:
+                bits = 64 if '/lib64/' in target else 32
+                filtered[(partition.lower(), bits, Path(target).name)] = target
+
+        def check_needed(item):
+            source, target = item
+            path = root / source
+            with path.open('rb') as stream:
+                header = stream.read(5)
+            if header[:4] != b'\x7fELF':
+                return []
+            bits = 64 if header[4] == 2 else 32
+            result = subprocess.run(['readelf', '-d', str(path)],
+                                    capture_output=True, text=True, check=True)
+            missing = []
+            for name in re.findall(r'\(NEEDED\).*\[(.*?)\]', result.stdout):
+                dependency = filtered.get((target.split('/')[0], bits, name))
+                if dependency:
+                    missing.append(f'Filtered ELF dependency: {target} needs {dependency}')
+            return missing
+
+        inputs = [(source, target) for target, sources in copies.items()
+                  for source in sources if source.startswith('vendor/xiaomi/')
+                  and (root / source).is_file()]
+        with concurrent.futures.ThreadPoolExecutor(max_workers=8) as executor:
+            for result in executor.map(check_needed, inputs):
+                errors.extend(result)
+        print(f'Filtered ELF dependency checks: {len(inputs)} retained blob copies')
+
 
 for error in errors:
     print('ERROR:', error, file=sys.stderr)

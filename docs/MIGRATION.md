@@ -48,7 +48,7 @@ m -j8 XiaomiTabletSettings custom.hardware.hwcontrol-service android.hardware.po
 
 ```bash
 get_build_var PRODUCT_COPY_FILES > /tmp/nabu-copy-files.txt
-python3 device/xiaomi/nabu/tools/validate-tree.py --copy-files /tmp/nabu-copy-files.txt
+python3 device/xiaomi/nabu/tools/validate-tree.py --copy-files /tmp/nabu-copy-files.txt --check-elf-dependencies
 ```
 
 只提取设备 blobs：

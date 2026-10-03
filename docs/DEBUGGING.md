@@ -77,3 +77,13 @@ adb shell dmesg > nabu-recovery-dmesg-verbose.log
 下一轮重点检查 Keymaster、qseecomd、keystore2 的启动/退出记录，以及 vold 和 mount_all 的阻塞位置。
 
 定向构建 bootimage 和 vendorbootimage 均通过。解包确认 `vendor_boot` 命令行含 `printk.devkmsg=on`，boot/vendor_boot 的嵌入 AVB hash 校验通过；内核与已生成完整 OTA 的 boot 内核 SHA256 相同。测试镜像和说明位于 `/home/dengxh/nabu_debug/boot-verbose/`，本次只需刷入其中的 `vendor_boot-debug.img`。
+
+## 增强日志定位到缺失共享库
+
+更新后的 `/home/dengxh/nabu_debug/nabu-pstore/` 显示 Keymaster 两次启动均退出 status 1，Gatekeeper 也退出 status 1。pmsg 明确记录 Gatekeeper 的 `dlopen` 失败：`libqcbor.so` 不存在。Keymaster 的 `libqtikeymaster4.so` 同样通过 DT_NEEDED 依赖该库。common 上游包含该 blob，但 nabu 的手机功能过滤列表误将它排除。keystore2 因 Keymaster 不可用持续等待，vold 的数据分区加密初始化因此不能完成，后面的 APEX/ADB/动画阶段没有到达。
+
+修复限定在 nabu 的 `common-vendor.mk`：恢复 libqcbor 及依赖审计发现的另外 11 个共享库；恢复 nabu init 仍声明的 pd-mapper 和 qrtr-ns 程序。库按保留组件的直接与传递依赖确定，继续从 common 取文件，不在 nabu vendor 中复制。
+
+`tools/validate-tree.py --copy-files /tmp/nabu-fixed-copy-files.txt --check-elf-dependencies` 检查通过：1509 个复制目的地、971 项保留 blob；它检查显式过滤的库是否仍被保留 blob 的 DT_NEEDED 引用。此检查不涵盖 dlopen 字符串、固件兼容性或实机运行。正常系统启动仍需重新构建完整 ROM 后验证；本次依赖修复不会进入仅刷入 vendor_boot 的镜像。
+
+14 项恢复文件的定向构建通过，安装输出与 common blob 逐字节一致。尚未重新生成完整 ROM ZIP 或验证正常系统开机。

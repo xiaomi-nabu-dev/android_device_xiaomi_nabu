@@ -1,6 +1,8 @@
 # SPDX-License-Identifier: Apache-2.0
 # Keep the upstream common vendor tree untouched. Nabu has no cellular modem,
-# GNSS, FM, camera motor or payment/fingerprint hardware.
+# GNSS, FM, camera motor or payment/fingerprint hardware. Shared dependencies
+# of retained HALs (including libqcbor and Bluetooth FM interfaces) and the
+# QRTR/PD services used by DSP peripherals must remain installed.
 include vendor/xiaomi/sm8150-common/sm8150-common-vendor.mk
 
 NABU_PHONE_ONLY_COPY_DESTINATIONS := \
@@ -18,7 +20,6 @@ NABU_PHONE_ONLY_COPY_DESTINATIONS := \
     $(TARGET_COPY_OUT_SYSTEM_EXT)/lib64/lib-imsvt.so \
     $(TARGET_COPY_OUT_SYSTEM_EXT)/lib64/lib-imsvtextutils.so \
     $(TARGET_COPY_OUT_SYSTEM_EXT)/lib64/lib-imsvtutils.so \
-    $(TARGET_COPY_OUT_SYSTEM_EXT)/lib64/libdiag_system.so \
     $(TARGET_COPY_OUT_SYSTEM_EXT)/lib64/libfm-hci.so \
     $(TARGET_COPY_OUT_SYSTEM_EXT)/lib64/libimscamera_jni.so \
     $(TARGET_COPY_OUT_SYSTEM_EXT)/lib64/libimsmedia_jni.so \
@@ -55,12 +56,10 @@ NABU_PHONE_ONLY_COPY_DESTINATIONS := \
     $(TARGET_COPY_OUT_VENDOR)/bin/mlid \
     $(TARGET_COPY_OUT_VENDOR)/bin/mlipayd@1.1 \
     $(TARGET_COPY_OUT_VENDOR)/bin/netmgrd \
-    $(TARGET_COPY_OUT_VENDOR)/bin/pd-mapper \
     $(TARGET_COPY_OUT_VENDOR)/bin/port-bridge \
     $(TARGET_COPY_OUT_VENDOR)/bin/power_off_alarm \
     $(TARGET_COPY_OUT_VENDOR)/bin/qrtr-cfg \
     $(TARGET_COPY_OUT_VENDOR)/bin/qrtr-lookup \
-    $(TARGET_COPY_OUT_VENDOR)/bin/qrtr-ns \
     $(TARGET_COPY_OUT_VENDOR)/bin/qti \
     $(TARGET_COPY_OUT_VENDOR)/bin/rmt_storage \
     $(TARGET_COPY_OUT_VENDOR)/bin/slim_daemon \
@@ -135,13 +134,11 @@ NABU_PHONE_ONLY_COPY_DESTINATIONS := \
     $(TARGET_COPY_OUT_VENDOR)/lib64/libaoa.so \
     $(TARGET_COPY_OUT_VENDOR)/lib64/libbatching.so \
     $(TARGET_COPY_OUT_VENDOR)/lib64/libcacertclient.so \
-    $(TARGET_COPY_OUT_VENDOR)/lib64/libconfigdb.so \
     $(TARGET_COPY_OUT_VENDOR)/lib64/libdataitems.so \
     $(TARGET_COPY_OUT_VENDOR)/lib64/libgdtap.so \
     $(TARGET_COPY_OUT_VENDOR)/lib64/libgeofencing.so \
     $(TARGET_COPY_OUT_VENDOR)/lib64/libgnss.so \
     $(TARGET_COPY_OUT_VENDOR)/lib64/libgnsspps.so \
-    $(TARGET_COPY_OUT_VENDOR)/lib64/libgps.utils.so \
     $(TARGET_COPY_OUT_VENDOR)/lib64/libizat_client_api.so \
     $(TARGET_COPY_OUT_VENDOR)/lib64/libizat_core.so \
     $(TARGET_COPY_OUT_VENDOR)/lib64/libjnihelper.so \
@@ -155,13 +152,9 @@ NABU_PHONE_ONLY_COPY_DESTINATIONS := \
     $(TARGET_COPY_OUT_VENDOR)/lib64/liblowi_client.so \
     $(TARGET_COPY_OUT_VENDOR)/lib64/liblowi_wifihal.so \
     $(TARGET_COPY_OUT_VENDOR)/lib64/liblqe.so \
-    $(TARGET_COPY_OUT_VENDOR)/lib64/libmdmdetect.so \
     $(TARGET_COPY_OUT_VENDOR)/lib64/libmdmimgload.so \
-    $(TARGET_COPY_OUT_VENDOR)/lib64/libminkdescriptor.so \
-    $(TARGET_COPY_OUT_VENDOR)/lib64/libminksocket.so \
     $(TARGET_COPY_OUT_VENDOR)/lib64/libmlipay.so \
     $(TARGET_COPY_OUT_VENDOR)/lib64/libmlipay@1.1.so \
-    $(TARGET_COPY_OUT_VENDOR)/lib64/libnetmgr.so \
     $(TARGET_COPY_OUT_VENDOR)/lib64/libnetmgr_common.so \
     $(TARGET_COPY_OUT_VENDOR)/lib64/libnetmgr_nr_fusion.so \
     $(TARGET_COPY_OUT_VENDOR)/lib64/libnetmgr_rmnet_ext.so \
@@ -169,12 +162,10 @@ NABU_PHONE_ONLY_COPY_DESTINATIONS := \
     $(TARGET_COPY_OUT_VENDOR)/lib64/liboemaids_vendor.so \
     $(TARGET_COPY_OUT_VENDOR)/lib64/libpdmapper.so \
     $(TARGET_COPY_OUT_VENDOR)/lib64/libpdnotifier.so \
-    $(TARGET_COPY_OUT_VENDOR)/lib64/libqcbor.so \
     $(TARGET_COPY_OUT_VENDOR)/lib64/libqcc_file_agent.so \
     $(TARGET_COPY_OUT_VENDOR)/lib64/libqcrilFramework.so \
     $(TARGET_COPY_OUT_VENDOR)/lib64/libqcrildatactl.so \
     $(TARGET_COPY_OUT_VENDOR)/lib64/libqdma_file_agent.so \
-    $(TARGET_COPY_OUT_VENDOR)/lib64/libqrtr.so \
     $(TARGET_COPY_OUT_VENDOR)/lib64/libqsocket.so \
     $(TARGET_COPY_OUT_VENDOR)/lib64/librcc.so \
     $(TARGET_COPY_OUT_VENDOR)/lib64/libril-qc-hal-qmi.so \
@@ -199,7 +190,6 @@ NABU_PHONE_ONLY_COPY_DESTINATIONS := \
     $(TARGET_COPY_OUT_VENDOR)/lib64/vendor.qti.gnss@4.0-service.so \
     $(TARGET_COPY_OUT_VENDOR)/lib64/vendor.qti.gnss@4.0.so \
     $(TARGET_COPY_OUT_VENDOR)/lib64/vendor.qti.hardware.alarm@1.0.so \
-    $(TARGET_COPY_OUT_VENDOR)/lib64/vendor.qti.hardware.fm@1.0.so \
     $(TARGET_COPY_OUT_VENDOR)/lib64/vendor.qti.hardware.radio.am@1.0.so \
     $(TARGET_COPY_OUT_VENDOR)/lib64/vendor.qti.hardware.radio.atcmdfwd@1.0.so \
     $(TARGET_COPY_OUT_VENDOR)/lib64/vendor.qti.hardware.radio.ims@1.0.so \
@@ -229,8 +219,6 @@ NABU_PHONE_ONLY_COPY_DESTINATIONS := \
     $(TARGET_COPY_OUT_VENDOR)/lib64/vendor.qti.ims.callcapability@1.0.so \
     $(TARGET_COPY_OUT_VENDOR)/lib64/vendor.qti.ims.callinfo@1.0.so \
     $(TARGET_COPY_OUT_VENDOR)/lib64/vendor.qti.ims.factory@1.0.so \
-    $(TARGET_COPY_OUT_VENDOR)/lib64/vendor.qti.ims.rcsconfig@1.0.so \
-    $(TARGET_COPY_OUT_VENDOR)/lib64/vendor.qti.ims.rcsconfig@1.1.so \
     $(TARGET_COPY_OUT_VENDOR)/lib64/vendor.qti.ims.rcsconfig@2.0.so \
     $(TARGET_COPY_OUT_VENDOR)/lib64/vendor.qti.ims.rcsconfig@2.1.so \
     $(TARGET_COPY_OUT_VENDOR)/lib64/vendor.qti.imsrtpservice@3.0-service-Impl.so \
