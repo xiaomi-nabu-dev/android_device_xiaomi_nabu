@@ -1,3 +1,0 @@
-define(`touchfeature_dev_ioctls', `{
-    TOUCH_FEATURE_INTERACT
-}')

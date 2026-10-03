@@ -15,7 +15,7 @@
 
 精确上游基线提交见 `upstream-lock.json`。现有目录是独立 Git checkout，已补齐所有远程分支和标签的历史。nabu 设备树、nabu vendor 以及 common 兼容改动分别提交在本地 `nabu-los20` 分支，尚未推送；使用各目录的 `git log` 和 `git show` 审阅。
 
-官方内核没有 lineage-20 分支，lineage-19.1 又缺少 nabu 驱动和配置。使用已有 nabu 支持的 lineage-22.2 内核，Android 用户空间仍是 13 / LOS 20。内核配置沿用 sm8150-perf_defconfig + sm8150-common.config + nabu.config；配置生成已经检查，整颗内核编译与启动仍需后续验证。
+官方内核没有 lineage-20 分支，lineage-19.1 又缺少 nabu 驱动和配置。使用已有 nabu 支持的 lineage-22.2 内核，Android 用户空间仍是 13 / LOS 20。内核配置沿用 sm8150-perf_defconfig + sm8150-common.config + nabu.config；配置生成、内核及 boot/dtbo/vendor_boot 定向编译已通过，用户已确认 recovery 可以启动；完整 Android 系统仍需验证。
 
 common blobs 使用实际存在的 lineage-20 分支，而不是题目给出的 lineage-21。22.2 的第三方拆分树仅用于核对拆分思路和音频重命名；没有整体回退其 Android 15 配置。
 
@@ -86,3 +86,15 @@ common 的补丁保存在 `patches/sm8150-common-lineage-20-tablet.patch`。在 
 ## 验证范围
 
 最终执行记录见 `VALIDATION.md`。配置选择、构建图和静态检查不能证明设备可以开机；完整编译、刷机与实机功能验证尚未进行。特别需要验证 recovery/解密、OTA 槽切换、触控和笔、键盘、120 Hz、四扬声器、相机、传感器、Wi-Fi/蓝牙、充电与待机功耗。
+
+## 设备树清理与新根历史
+
+337 个设备树文件清理为 278 个，删除 59 个文件：34 个仅含注释的 SELinux 文件，未选用的 RemovePackages、powerhint、旧提取排序工具、空 odm 属性和非 A/B release hook，以及已由 common 提供的重复文件。
+
+6 个完全相同的启动脚本改为直接从 common 构建，保留原 nabu 模块名、安装路径和可执行权限；4 个共享音频文件、P2P 配置和设备兼容矩阵也直接复用 common。nabu 仍保留 early_boot/post_boot 差异脚本、虚拟 A/B fstab、四扬声器配置、平板 overlay 和硬件控制服务。
+
+旧 TouchFeature HIDL 服务没有选入产品，也没有对应的 proprietary provider。当前笔和双击唤醒由 hwcontrol AIDL 访问官方内核 sysfs，所以移除了过时的 HIDL manifest/matrix 要求、/dev/xiaomi-touch 标签和 ioctl 策略。Wi-Fi 平板遗留的 radio/IMS 属性同时移除。
+
+剩余文件中，parts 有 123 个文件（设置界面、服务和多语言资源），audio 17 个，sepolicy 39 个，rootdir 14 个；这些仍有实际用途，不以文件名或数量为依据删除。
+
+以 43eca20 为终点的 616 个旧提交合为一个初始根快照，之后的移植、recovery 显示修复和 ADB 调试提交保持各自独立，最后追加本次清理提交。原始基线 SHA 继续保存在 upstream-lock.json 中供溯源；旧历史保存在源码树外的 Git bundle，远程 upstream 分支仍作为参考。

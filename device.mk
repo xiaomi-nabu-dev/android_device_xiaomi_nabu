@@ -27,6 +27,13 @@ PRODUCT_PACKAGES_DEBUG += bootctl
 PRODUCT_PACKAGES += libpiex_shim android.hardware.thermal@2.0-service.qti
 PRODUCT_PACKAGES += android.hardware.power-service-nabu
 PRODUCT_COPY_FILES += $(call find-copy-subdir-files,*,$(LOCAL_PATH)/audio/,$(TARGET_COPY_OUT_VENDOR)/etc)
+
+# Unchanged SoC audio configuration comes from common.
+PRODUCT_COPY_FILES += \
+    device/xiaomi/sm8150-common/audio/bluetooth_hearing_aid_audio_policy_configuration.xml:$(TARGET_COPY_OUT_VENDOR)/etc/bluetooth_hearing_aid_audio_policy_configuration.xml \
+    device/xiaomi/sm8150-common/audio/audio_tuning_mixer.txt:$(TARGET_COPY_OUT_VENDOR)/etc/audio_tuning_mixer.txt \
+    device/xiaomi/sm8150-common/audio/graphite_ipc_platform_info.xml:$(TARGET_COPY_OUT_VENDOR)/etc/graphite_ipc_platform_info.xml \
+    device/xiaomi/sm8150-common/audio/audio_tuning_mixer_tavil.txt:$(TARGET_COPY_OUT_VENDOR)/etc/audio_tuning_mixer_tavil.txt
 PRODUCT_COPY_FILES += $(LOCAL_PATH)/configs/public.libraries.txt:$(TARGET_COPY_OUT_VENDOR)/etc/public.libraries.txt
 PRODUCT_COPY_FILES += $(LOCAL_PATH)/configs/component-overrides.xml:$(TARGET_COPY_OUT_VENDOR)/etc/sysconfig/component-overrides.xml
 PRODUCT_COPY_FILES += frameworks/native/data/etc/tablet_core_hardware.xml:$(TARGET_COPY_OUT_VENDOR)/etc/permissions/tablet_core_hardware.xml
@@ -38,7 +45,7 @@ PRODUCT_COPY_FILES += $(LOCAL_PATH)/rootdir/etc/fstab.qcom:$(TARGET_COPY_OUT_VEN
 PRODUCT_COPY_FILES += $(LOCAL_PATH)/rootdir/etc/fstab.qcom:$(TARGET_COPY_OUT_VENDOR_RAMDISK)/first_stage_ramdisk/fstab.qcom
 PRODUCT_PACKAGES += nabu_init.class_main.sh nabu_init.qcom.class_core.sh nabu_init.qcom.early_boot.sh nabu_init.qcom.post_boot.sh nabu_init.qcom.sh nabu_init.qcom.usb.sh nabu_init.qti.chg_policy.sh nabu_init.qti.dcvs.sh
 PRODUCT_PACKAGES += nabu_init.qcom.power.rc nabu_init.qcom.rc nabu_init.qcom.usb.rc nabu_init.recovery.qcom.rc nabu_init.target.rc nabu_init.xiaomi.rc nabu_ueventd.qcom.rc nabu_init.nabu.perf.rc
-PRODUCT_COPY_FILES += $(LOCAL_PATH)/wifi/p2p_supplicant_overlay.conf:$(TARGET_COPY_OUT_VENDOR)/etc/wifi/p2p_supplicant_overlay.conf
+PRODUCT_COPY_FILES += device/xiaomi/sm8150-common/wifi/p2p_supplicant_overlay.conf:$(TARGET_COPY_OUT_VENDOR)/etc/wifi/p2p_supplicant_overlay.conf
 PRODUCT_COPY_FILES += $(LOCAL_PATH)/wifi/wpa_supplicant_overlay.conf:$(TARGET_COPY_OUT_VENDOR)/etc/wifi/wpa_supplicant_overlay.conf
 PRODUCT_COPY_FILES += $(LOCAL_PATH)/wifi/WCNSS_qcom_cfg.ini:$(TARGET_COPY_OUT_VENDOR)/etc/wifi/WCNSS_qcom_cfg.ini
 DEVICE_PACKAGE_OVERLAYS += $(LOCAL_PATH)/overlay-lineage

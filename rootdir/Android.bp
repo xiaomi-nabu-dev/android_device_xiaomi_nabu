@@ -5,19 +5,7 @@
 //
 
 // Init scripts
-sh_binary {
-    name: "nabu_init.class_main.sh",
-    filename: "init.class_main.sh",
-    src: "bin/init.class_main.sh",
-    vendor: true,
-}
 
-sh_binary {
-    name: "nabu_init.qcom.class_core.sh",
-    filename: "init.qcom.class_core.sh",
-    src: "bin/init.qcom.class_core.sh",
-    vendor: true,
-}
 
 sh_binary {
     name: "nabu_init.qcom.early_boot.sh",
@@ -33,33 +21,9 @@ sh_binary {
     vendor: true,
 }
 
-sh_binary {
-    name: "nabu_init.qcom.sh",
-    filename: "init.qcom.sh",
-    src: "bin/init.qcom.sh",
-    vendor: true,
-}
 
-sh_binary {
-    name: "nabu_init.qcom.usb.sh",
-    filename: "init.qcom.usb.sh",
-    src: "bin/init.qcom.usb.sh",
-    vendor: true,
-}
 
-sh_binary {
-    name: "nabu_init.qti.chg_policy.sh",
-    filename: "init.qti.chg_policy.sh",
-    src: "bin/init.qti.chg_policy.sh",
-    vendor: true,
-}
 
-sh_binary {
-    name: "nabu_init.qti.dcvs.sh",
-    filename: "init.qti.dcvs.sh",
-    src: "bin/init.qti.dcvs.sh",
-    vendor: true,
-}
 
 // Init configuration files
 prebuilt_etc {

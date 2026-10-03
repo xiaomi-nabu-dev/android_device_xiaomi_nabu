@@ -20,3 +20,11 @@
 完整 ROM、内核镜像编译、刷机与实机测试尚未执行。上述结果不证明可以开机，也不覆盖相机、功耗、笔/键盘、充电或 OTA 的实际功能。
 
 完整工具日志保存在本次会话的临时参考目录 `/tmp/nabu-los20-reference/`：breakfast.log、graph.log、brunch-dry-run.log、selinux.log、kernel-config.log；精确源提交见 upstream-lock.json。
+
+## 后续实机与清理验证
+
+用户已确认 recovery 可以启动。内核以及 boot/dtbo/vendor_boot 已实际编译，测试包保存在 out/target/product/nabu/nabu-recovery-test-20261003.zip。
+
+设备树清理后，m nothing、selinux_policy、6 个复用 common 的启动脚本定向构建、framework_compatibility_matrix.device.xml，以及 blob/XML/PRODUCT_COPY_FILES 检查通过。6 个安装脚本与 common 原文件逐字节一致，权限均为 0755。笔、键盘、双击唤醒、recovery 显示和调试 ADB 配置继续保留。
+
+清理验证日志：/tmp/nabu-cleanup-check/。此前的完整 ROM 和实机硬件验证记录仍按当时范围解读。
