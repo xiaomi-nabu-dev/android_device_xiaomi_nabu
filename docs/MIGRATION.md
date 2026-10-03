@@ -23,7 +23,7 @@ TARGET_POWER_HINT_CONFIG 指向设备 JSON，手机未设置时仍使用原 comm
 
 ## 基线
 
-设备与 common/vendor/hardware 的上游基线仍见 [upstream-lock.json](../upstream-lock.json)。common、nabu DT 和 nabu vendor 的适配提交分别在本地 nabu-los20 分支；common 所需的本地整合提交也单独记录在锁定文件中。必须使用包含 shared tablet 支持的 common checkout。完整实现通过 Git 提交维护，原先的独立小补丁已经移除，不再需要 patches/ 目录。发布可复用的 manifest 时，应指向包含该整合提交的 common fork。
+设备与 common/vendor/hardware 的上游基线仍见 [upstream-lock.json](upstream-lock.json)。common、nabu DT 和 nabu vendor 的适配提交分别在本地 nabu-los20 分支；common 所需的本地整合提交也单独记录在锁定文件中。必须使用包含 shared tablet 支持的 common checkout。完整实现通过 Git 提交维护，原先的独立小补丁已经移除，不再需要 patches/ 目录。发布可复用的 manifest 时，应指向包含该整合提交的 common fork。
 
 官方内核没有 lineage-20 分支，lineage-19.1 缺少 nabu 支持。使用官方 lineage-22.2 的 Linux 4.14.356，用户空间为 Android 13。内核与 boot/dtbo/vendor_boot 已实际编译，用户确认 recovery 启动成功；完整 Android 系统仍需实机验证。
 
