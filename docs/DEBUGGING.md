@@ -18,15 +18,15 @@ LOS 20 当前 `bootable/recovery/recovery_ui/screen_ui.cpp` 会读取此属性�
 - `WITH_ADB_INSECURE=true` 在继承 Lineage 公共产品前设置，使生成的 `ro.adb.secure=0`。
 - `ro.adb.secure.recovery=0`，recovery 无需屏幕授权。
 - `persist.sys.usb.config=adb`。
-- `init.nabu.debug.rc` 只在调试构建安装到 `/system/etc/init/`；在 `on init` 准备 configfs 和 ADB FunctionFS，选择 USB ADB 并请求启动 adbd。
-- 持久属性加载后和 Qualcomm boot USB 脚本执行后，重新选用 ADB，避免旧 /data 设置或脚本清空配置。
+- `init.nabu.debug.rc` 只在调试构建安装到 `/system/etc/init/`；在 `on init` 准备 configfs 目录并保持 USB 配置为 none，在 `on boot` 的默认 APEX namespace 中选择 USB ADB 并启动 adbd。FunctionFS 挂载由已有 Qualcomm USB init 负责。
+- 持久属性加载后只记录 persist.sys.usb.config=adb；到 boot 再选用 USB ADB，避免在 APEX namespace 就绪之前间接触发启动。
 - recovery 在 `post-fs`、FunctionFS 准备完成后启动 ADB，早于 recovery UI 初始化。
 
 `user` 构建配置已核对，继续使用 `ro.adb.secure=1`。没有修改 SELinux 策略或普通系统的 ro.secure。调试结束后可撤回单独的 ADB 调试提交，保留 recovery 显示修复。
 
 ## 启动时机边界
 
-正常 Android 的 adbd 是 APEX 服务。LOS 20 init 会把早期启动请求排队，待 APEX 激活和服务配置加载完成后执行。因此不需要等 Android 桌面或授权 UI，但无法覆盖 kernel/first-stage-init 崩溃，或正常系统卡在 APEX 可用之前的情况。
+正常 Android 的 adbd 是 APEX 服务。LOS 20 在 perform_apex_config 中先释放排队服务，随后才完成默认 namespace 的 linker 配置；早期请求因此可能让 adbd 永久标记为 bootstrap 服务，看不到非 bootstrap 的 adbd APEX。当前在 boot 阶段首次启动 adbd，仍早于桌面可用，也无需授权 UI，但无法覆盖 kernel/first-stage-init 或 APEX 就绪之前的崩溃。
 
 recovery 使用自身 ramdisk 的 adbd，没有这一 APEX 等待；当前 post-fs 启动点也不依赖 recovery UI 成功显示。后续菜单仍可切换 USB 到 sideload/fastbootd，没有添加持续强制切回 ADB 的触发器。
 
@@ -95,3 +95,11 @@ adb shell dmesg > nabu-recovery-dmesg-verbose.log
 官方 sm8150 手机 defconfig 未启用 UNICODE。nabu 的 BoardConfig 通过 Lineage 原生 `KERNEL_CONFIG_OVERRIDE := CONFIG_UNICODE=y` 启用它，避免修改公共内核源码或其他设备的配置；构建会在基础片段合并后运行 oldconfig。保持现有 F2FS、casefold 和加密配置，仅重编 boot 中的内核。无需为这个修复重新格式化 userdata，也无需替换 dtbo/vendor_boot。实际启动结果仍需刷入新 boot 后确认。
 
 `m -j8 bootimage` 成功（4 分 58 秒）；生成 `.config` 确认 CONFIG_UNICODE=y，System.map 包含 utf8_load/utf8_casefold，解包确认新内核与旧 OTA 不同，嵌入 AVB hash 校验通过。测试镜像位于 `/home/dengxh/nabu_debug/boot-casefold/boot.img`，仅需更新当前槽位的 boot；正常系统开机仍待实机验证。
+
+## 系统 ADB 时机修复与 Wi-Fi panic
+
+实机已进入系统。Wi-Fi 取证文件实际位于 `/home/dengxh/nabu_debug/nabu-pstore-wifi/pstore/`；父目录中的两份文件仍是旧日志。新日志反复显示 adbd 在 APEX 已挂载后执行路径不存在；init 的 Service::Start 会把首次在默认 namespace ready 之前启动的服务永久标记为 bootstrap，属于此前早期 ADB 请求的时机错误。删除 init 阶段的 adbd/USB adb 请求、持久属性加载阶段仅写 persist 属性，到 boot 再启动，避免该错误；同时删除重复 FunctionFS 挂载。
+
+`m nabu-debug-init`、host_init_verifier 和 recovery 应用脚本的 bash 语法检查通过。`tools/apply-adb-recovery-fix.sh` 可在 recovery 将新 rc 写入当前槽位的 system，不修改 userdata 设置；写入前备份原文件并尽量恢复只读挂载。运行包位于 `/home/dengxh/nabu_debug/adb-recovery-fix/`。当前主机未连接到设备，尚未执行恢复脚本或验证系统 ADB。若找不到当前逻辑 system 设备，应先通过 recovery 的挂载 system 功能创建映射。
+
+Wi-Fi HAL 写驱动状态返回 Invalid argument；随后内核在约 48 秒记录 `Fatal error on modem!`、`Kernel panic - not syncing: subsys-restart: Resetting the SoC - modem crashed.`。这证明有真实的子系统 panic，尚未证明是 Wi-Fi 驱动本身、固件或配套服务缺失导致。本次不修改重启策略或掩盖 panic；先恢复正常系统 ADB 以便收集实时日志。

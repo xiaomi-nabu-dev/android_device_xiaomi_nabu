@@ -1,7 +1,7 @@
 # Copyright (C) 2026 The LineageOS Project
 # SPDX-License-Identifier: Apache-2.0
 # Installed only in userdebug/eng. Prepare USB before /data and Android services.
-# The updatable adbd service is queued until its APEX has been activated.
+# Start ADB at boot, after init has entered the default APEX mount namespace.
 on init && property:ro.debuggable=1
     # Platform init has already mounted configfs during its on-init action.
     mkdir /config/usb_gadget/g1 0770 shell shell
@@ -16,18 +16,16 @@ on init && property:ro.debuggable=1
     mkdir /config/usb_gadget/g1/configs/b.1/strings/0x409 0770 shell shell
     mkdir /dev/usb-ffs 0775 shell shell
     mkdir /dev/usb-ffs/adb 0770 shell shell
-    mount functionfs adb /dev/usb-ffs/adb uid=2000,gid=2000
     setprop sys.usb.controller ${ro.boot.usbcontroller:-a600000.dwc3}
     setprop sys.usb.configfs 1
-    setprop sys.usb.config adb
-    start adbd
+    setprop sys.usb.config none
 
 # An existing /data property must not restore a non-ADB configuration.
 on property:ro.persistent_properties.ready=true && property:ro.debuggable=1
     setprop persist.sys.usb.config adb
-    setprop sys.usb.config adb
 
 # Qualcomm's boot USB script resets sys.usb.config; restore the debug mode after it.
 on boot && property:ro.debuggable=1
     setprop persist.sys.usb.config adb
     setprop sys.usb.config adb
+    start adbd
