@@ -6,6 +6,7 @@
 #include "KeyboardState.h"
 #include <android-base/logging.h>
 #include <fstream>
+#include <android-base/strings.h>
 
 const std::string TAG="KeyboardState";
 
@@ -20,11 +21,11 @@ int getKeyboardState(void) {
     std::string sysfs_data((std::istreambuf_iterator<char>(kb_data)),
                            std::istreambuf_iterator<char>());
 
-    if (!DISABLE_DEBUG) LOG(INFO) << TAG << ": " << "Read keyboard state as: " << ((sysfs_data == kb_state.enable) ? "true" : "false");
+    if (!DISABLE_DEBUG) LOG(INFO) << TAG << ": " << "Read keyboard state as: " << ((android::base::Trim(sysfs_data) == kb_state.enable) ? "true" : "false");
     kb_data.close();
 
-    if (!DISABLE_DEBUG) LOG(INFO) << TAG << ": " << "Returning keyboard state as: " << ((sysfs_data == kb_state.enable) ? "true" : "false");
-    return (sysfs_data == kb_state.enable) ? 1 : 0;
+    if (!DISABLE_DEBUG) LOG(INFO) << TAG << ": " << "Returning keyboard state as: " << ((android::base::Trim(sysfs_data) == kb_state.enable) ? "true" : "false");
+    return (android::base::Trim(sysfs_data) == kb_state.enable) ? 1 : 0;
 }
 
 void setKeyboardState(int state) {

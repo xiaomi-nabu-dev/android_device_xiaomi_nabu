@@ -16,9 +16,9 @@ struct KeyboardState {
 using KeyboardIO = struct KeyboardState;
 
 const KeyboardIO kb_state = {
-    .path = "/sys/devices/platform/soc/soc:xiaomi_keyboard/xiaomi_keyboard_conn_status",
-    .enable = "enable_keyboard",
-    .disable = "disable_keyboard"
+    .path = "/sys/devices/platform/soc/soc:xiaomi_keyboard/xiaomi_keyboard_enabled",
+    .enable = "1",
+    .disable = "0"
 };
 
 int getKeyboardState(void);

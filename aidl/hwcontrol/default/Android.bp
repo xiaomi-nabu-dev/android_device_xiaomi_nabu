@@ -5,6 +5,7 @@
 //
 cc_binary {
     name: "custom.hardware.hwcontrol-service",
+    system_ext_specific: true,
     init_rc: ["custom.hardware.hwcontrol.rc"],
     vintf_fragments: ["custom.hardware.hwcontrol.xml"],
     shared_libs: [

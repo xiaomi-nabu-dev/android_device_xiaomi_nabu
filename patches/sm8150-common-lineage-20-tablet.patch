@@ -1,0 +1,755 @@
+diff --git a/Android.mk b/Android.mk
+index 91a7b66..89b5f83 100644
+--- a/Android.mk
++++ b/Android.mk
+@@ -86,7 +86,7 @@ $(WIFI_FIRMWARE_SYMLINKS): $(LOCAL_INSTALLED_MODULE)
+ 	@echo "Creating wifi firmware symlinks: $@"
+ 	@mkdir -p $@
+ 	$(hide) ln -sf /vendor/etc/wifi/WCNSS_qcom_cfg.ini $@/WCNSS_qcom_cfg.ini
+-	$(hide) ln -sf /mnt/vendor/persist/wlan_mac.bin $@/wlan_mac.bin
++	$(hide) ln -sf $(if $(TARGET_WLAN_MAC_PATH),$(TARGET_WLAN_MAC_PATH),/mnt/vendor/persist/wlan_mac.bin) $@/wlan_mac.bin
+ 
+ ALL_DEFAULT_INSTALLED_MODULES += $(WIFI_FIRMWARE_SYMLINKS)
+ 
+diff --git a/BoardConfigCommon.mk b/BoardConfigCommon.mk
+index 67a9b76..38b92a4 100644
+--- a/BoardConfigCommon.mk
++++ b/BoardConfigCommon.mk
+@@ -150,9 +150,9 @@ TARGET_BOARD_PLATFORM := msmnile
+ TARGET_TAP_TO_WAKE_NODE := "/sys/touchpanel/double_tap"
+ 
+ # Properties
+-TARGET_ODM_PROP += $(COMMON_PATH)/odm.prop
+-TARGET_SYSTEM_PROP += $(COMMON_PATH)/system.prop
+-TARGET_VENDOR_PROP += $(COMMON_PATH)/vendor.prop
++TARGET_ODM_PROP += $(COMMON_PATH)/odm$(if $(filter true,$(TARGET_IS_TABLET)),-tablet).prop
++TARGET_SYSTEM_PROP += $(COMMON_PATH)/system$(if $(filter true,$(TARGET_IS_TABLET)),-tablet).prop
++TARGET_VENDOR_PROP += $(COMMON_PATH)/vendor$(if $(filter true,$(TARGET_IS_TABLET)),-tablet).prop
+ 
+ # Recovery
+ BOARD_INCLUDE_RECOVERY_DTBO := true
+diff --git a/msmnile.mk b/msmnile.mk
+index f203da1..7f8f1bb 100644
+--- a/msmnile.mk
++++ b/msmnile.mk
+@@ -10,6 +10,41 @@ $(call inherit-product, $(SRC_TARGET_DIR)/product/updatable_apex.mk)
+ # Setup dalvik vm configs
+ $(call inherit-product, frameworks/native/build/phone-xhdpi-6144-dalvik-heap.mk)
+ 
++ifeq ($(TARGET_IS_TABLET),true)
++# Permissions
++PRODUCT_COPY_FILES += \
++    frameworks/native/data/etc/android.hardware.audio.low_latency.xml:$(TARGET_COPY_OUT_VENDOR)/etc/permissions/android.hardware.audio.low_latency.xml \
++    frameworks/native/data/etc/android.hardware.audio.pro.xml:$(TARGET_COPY_OUT_VENDOR)/etc/permissions/android.hardware.audio.pro.xml \
++    frameworks/native/data/etc/android.hardware.bluetooth.xml:$(TARGET_COPY_OUT_VENDOR)/etc/permissions/android.hardware.bluetooth.xml \
++    frameworks/native/data/etc/android.hardware.bluetooth_le.xml:$(TARGET_COPY_OUT_VENDOR)/etc/permissions/android.hardware.bluetooth_le.xml \
++    frameworks/native/data/etc/android.hardware.camera.flash-autofocus.xml:$(TARGET_COPY_OUT_VENDOR)/etc/permissions/android.hardware.camera.flash-autofocus.xml \
++    frameworks/native/data/etc/android.hardware.camera.front.xml:$(TARGET_COPY_OUT_VENDOR)/etc/permissions/android.hardware.camera.front.xml \
++    frameworks/native/data/etc/android.hardware.camera.full.xml:$(TARGET_COPY_OUT_VENDOR)/etc/permissions/android.hardware.camera.full.xml \
++    frameworks/native/data/etc/android.hardware.camera.raw.xml:$(TARGET_COPY_OUT_VENDOR)/etc/permissions/android.hardware.camera.raw.xml \
++    frameworks/native/data/etc/android.hardware.opengles.aep.xml:$(TARGET_COPY_OUT_VENDOR)/etc/permissions/android.hardware.opengles.aep.xml \
++    frameworks/native/data/etc/android.hardware.sensor.accelerometer.xml:$(TARGET_COPY_OUT_VENDOR)/etc/permissions/android.hardware.sensor.accelerometer.xml \
++    frameworks/native/data/etc/android.hardware.sensor.compass.xml:$(TARGET_COPY_OUT_VENDOR)/etc/permissions/android.hardware.sensor.compass.xml \
++    frameworks/native/data/etc/android.hardware.sensor.gyroscope.xml:$(TARGET_COPY_OUT_VENDOR)/etc/permissions/android.hardware.sensor.gyroscope.xml \
++    frameworks/native/data/etc/android.hardware.sensor.light.xml:$(TARGET_COPY_OUT_VENDOR)/etc/permissions/android.hardware.sensor.light.xml \
++    frameworks/native/data/etc/android.hardware.sensor.stepcounter.xml:$(TARGET_COPY_OUT_VENDOR)/etc/permissions/android.hardware.sensor.stepcounter.xml \
++    frameworks/native/data/etc/android.hardware.sensor.stepdetector.xml:$(TARGET_COPY_OUT_VENDOR)/etc/permissions/android.hardware.sensor.stepdetector.xml \
++    frameworks/native/data/etc/android.hardware.touchscreen.multitouch.jazzhand.xml:$(TARGET_COPY_OUT_VENDOR)/etc/permissions/android.hardware.touchscreen.multitouch.jazzhand.xml \
++    frameworks/native/data/etc/android.hardware.usb.accessory.xml:$(TARGET_COPY_OUT_VENDOR)/etc/permissions/android.hardware.usb.accessory.xml \
++    frameworks/native/data/etc/android.hardware.usb.host.xml:$(TARGET_COPY_OUT_VENDOR)/etc/permissions/android.hardware.usb.host.xml \
++    frameworks/native/data/etc/android.hardware.vulkan.compute-0.xml:$(TARGET_COPY_OUT_VENDOR)/etc/permissions/android.hardware.vulkan.compute-0.xml \
++    frameworks/native/data/etc/android.hardware.vulkan.level-1.xml:$(TARGET_COPY_OUT_VENDOR)/etc/permissions/android.hardware.vulkan.level-1.xml \
++    frameworks/native/data/etc/android.hardware.vulkan.version-1_1.xml:$(TARGET_COPY_OUT_VENDOR)/etc/permissions/android.hardware.vulkan.version-1_1.xml \
++    frameworks/native/data/etc/android.hardware.wifi.direct.xml:$(TARGET_COPY_OUT_VENDOR)/etc/permissions/android.hardware.wifi.direct.xml \
++    frameworks/native/data/etc/android.hardware.wifi.passpoint.xml:$(TARGET_COPY_OUT_VENDOR)/etc/permissions/android.hardware.wifi.passpoint.xml \
++    frameworks/native/data/etc/android.hardware.wifi.xml:$(TARGET_COPY_OUT_VENDOR)/etc/permissions/android.hardware.wifi.xml \
++    frameworks/native/data/etc/android.software.device_id_attestation.xml:$(TARGET_COPY_OUT_VENDOR)/etc/permissions/android.software.device_id_attestation.xml \
++    frameworks/native/data/etc/android.software.ipsec_tunnels.xml:$(TARGET_COPY_OUT_VENDOR)/etc/permissions/android.software.ipsec_tunnels.xml \
++    frameworks/native/data/etc/android.software.midi.xml:$(TARGET_COPY_OUT_VENDOR)/etc/permissions/android.software.midi.xml \
++    frameworks/native/data/etc/android.software.sip.voip.xml:$(TARGET_COPY_OUT_VENDOR)/etc/permissions/android.software.sip.voip.xml \
++    frameworks/native/data/etc/android.software.verified_boot.xml:$(TARGET_COPY_OUT_VENDOR)/etc/permissions/android.software.verified_boot.xml
++
++
++else
+ # Permissions
+ PRODUCT_COPY_FILES += \
+     frameworks/native/data/etc/android.hardware.audio.low_latency.xml:$(TARGET_COPY_OUT_VENDOR)/etc/permissions/android.hardware.audio.low_latency.xml \
+@@ -50,6 +85,8 @@ PRODUCT_COPY_FILES += \
+     frameworks/native/data/etc/android.software.sip.voip.xml:$(TARGET_COPY_OUT_VENDOR)/etc/permissions/android.software.sip.voip.xml \
+     frameworks/native/data/etc/android.software.verified_boot.xml:$(TARGET_COPY_OUT_VENDOR)/etc/permissions/android.software.verified_boot.xml
+ 
++endif
++
+ # Audio
+ PRODUCT_PACKAGES += \
+     android.hardware.audio@6.0-impl \
+@@ -60,12 +97,12 @@ PRODUCT_PACKAGES += \
+ 
+ PRODUCT_PACKAGES += \
+     audio.bluetooth.default \
+-    audio.primary.msmnile \
++    $(if $(filter true,$(TARGET_IS_TABLET)),,audio.primary.msmnile) \
+     audio.r_submix.default \
+     audio.usb.default
+ 
+ PRODUCT_PACKAGES += \
+-    liba2dpoffload \
++    $(if $(filter true,$(TARGET_IS_TABLET)),,liba2dpoffload) \
+     libaudiopreprocessing \
+     libbatterylistener \
+     libbundlewrapper \
+@@ -86,6 +123,7 @@ PRODUCT_PACKAGES += \
+     libvisualizer \
+     libvolumelistener
+ 
++ifneq ($(TARGET_IS_TABLET),true)
+ # Audio configs
+ PRODUCT_COPY_FILES += \
+     $(call find-copy-subdir-files,*,$(LOCAL_PATH)/audio/,$(TARGET_COPY_OUT_VENDOR)/etc)
+@@ -97,6 +135,8 @@ PRODUCT_COPY_FILES += \
+     frameworks/av/services/audiopolicy/config/r_submix_audio_policy_configuration.xml:$(TARGET_COPY_OUT_VENDOR)/etc/r_submix_audio_policy_configuration.xml \
+     frameworks/av/services/audiopolicy/config/usb_audio_policy_configuration.xml:$(TARGET_COPY_OUT_VENDOR)/etc/usb_audio_policy_configuration.xml
+ 
++endif # !TARGET_IS_TABLET
++
+ # Bluetooth
+ PRODUCT_PACKAGES += \
+     android.hardware.bluetooth@1.1.vendor \
+@@ -121,14 +161,20 @@ PRODUCT_PACKAGES += \
+ PRODUCT_PACKAGES += \
+     disable_configstore
+ 
++ifneq ($(TARGET_IS_TABLET),true)
+ # Consumer IR
+ PRODUCT_PACKAGES += \
+     android.hardware.ir@1.0-service.xiaomi
+ 
++endif # !TARGET_IS_TABLET
++
++ifneq ($(TARGET_IS_TABLET),true)
+ # Device-specific settings
+ PRODUCT_PACKAGES += \
+     XiaomiParts
+ 
++endif # !TARGET_IS_TABLET
++
+ # Display
+ PRODUCT_PACKAGES += \
+     android.hardware.graphics.composer@2.4-service \
+@@ -174,6 +220,7 @@ PRODUCT_PACKAGES += \
+ PRODUCT_PACKAGES += \
+     fastbootd
+ 
++ifneq ($(TARGET_IS_TABLET),true)
+ # Fingerprint
+ PRODUCT_PACKAGES += \
+     android.hardware.biometrics.fingerprint@2.3-service.xiaomi
+@@ -186,21 +233,29 @@ PRODUCT_PACKAGES += \
+     vendor.goodix.hardware.biometrics.fingerprint@2.1.vendor
+ endif
+ 
++endif # !TARGET_IS_TABLET
++
++ifneq ($(TARGET_IS_TABLET),true)
+ # FM
+ PRODUCT_PACKAGES += \
+     FM2 \
+     libqcomfm_jni \
+     qcom.fmradio
+ 
++endif # !TARGET_IS_TABLET
++
+ # Gatekeeper
+ PRODUCT_PACKAGES += \
+     android.hardware.gatekeeper@1.0.vendor
+ 
++ifneq ($(TARGET_IS_TABLET),true)
+ # GPS
+ PRODUCT_PACKAGES += \
+     android.hardware.gnss@1.1.vendor \
+     android.hardware.gnss@2.1.vendor
+ 
++endif # !TARGET_IS_TABLET
++
+ # Health
+ PRODUCT_PACKAGES += \
+     android.hardware.health-service.qti \
+@@ -220,10 +275,13 @@ PRODUCT_PACKAGES += \
+ PRODUCT_COPY_FILES += \
+     $(LOCAL_PATH)/permissions/privapp-permissions-hotword.xml:$(TARGET_COPY_OUT_PRODUCT)/etc/permissions/privapp-permissions-hotword.xml
+ 
++ifneq ($(TARGET_IS_TABLET),true)
+ # IFAAService
+ PRODUCT_PACKAGES += \
+     IFAAService
+ 
++endif # !TARGET_IS_TABLET
++
+ # IPACM
+ PRODUCT_PACKAGES += \
+     ipacm \
+@@ -263,11 +321,14 @@ PRODUCT_COPY_FILES += \
+     frameworks/av/media/libstagefright/data/media_codecs_google_video.xml:$(TARGET_COPY_OUT_VENDOR)/etc/media_codecs_google_video.xml \
+     frameworks/av/media/libstagefright/data/media_codecs_google_video_le.xml:$(TARGET_COPY_OUT_VENDOR)/etc/media_codecs_google_video_le.xml
+ 
++ifneq ($(TARGET_IS_TABLET),true)
+ # Mlipay
+ PRODUCT_PACKAGES += \
+     vendor.xiaomi.hardware.mlipay@1.1.vendor \
+     vendor.xiaomi.hardware.mtdservice@1.2.vendor
+ 
++endif # !TARGET_IS_TABLET
++
+ # Net
+ PRODUCT_PACKAGES += \
+     android.system.net.netd@1.1.vendor
+@@ -276,6 +337,7 @@ PRODUCT_PACKAGES += \
+ PRODUCT_PACKAGES += \
+     android.hardware.neuralnetworks@1.3.vendor
+ 
++ifneq ($(TARGET_IS_TABLET),true)
+ # NFC
+ PRODUCT_PACKAGES += \
+     android.hardware.nfc@1.2-service \
+@@ -296,6 +358,8 @@ PRODUCT_COPY_FILES += \
+     frameworks/native/data/etc/android.hardware.se.omapi.uicc.xml:$(TARGET_COPY_OUT_ODM)/etc/permissions/sku_nfc/android.hardware.se.omapi.uicc.xml \
+     frameworks/native/data/etc/com.android.nfc_extras.xml:$(TARGET_COPY_OUT_ODM)/etc/permissions/sku_nfc/com.android.nfc_extras.xml
+ 
++endif # !TARGET_IS_TABLET
++
+ # OMX
+ PRODUCT_PACKAGES += \
+     libOmxAacEnc \
+@@ -308,6 +372,7 @@ PRODUCT_PACKAGES += \
+     libOmxVenc \
+     libstagefrighthw
+ 
++ifneq ($(TARGET_IS_TABLET),true)
+ # Overlays
+ DEVICE_PACKAGE_OVERLAYS += \
+     $(LOCAL_PATH)/overlay \
+@@ -316,13 +381,16 @@ DEVICE_PACKAGE_OVERLAYS += \
+ PRODUCT_ENFORCE_RRO_TARGETS := *
+ PRODUCT_ENFORCE_RRO_EXCLUDED_OVERLAYS += $(LOCAL_PATH)/overlay/packages/apps/CarrierConfig
+ 
++endif # !TARGET_IS_TABLET
++
+ # Partitions
+ PRODUCT_USE_DYNAMIC_PARTITIONS := true
+ 
+ # Perf
+ PRODUCT_PACKAGES += \
+-    libqti-perfd-client
++    $(if $(filter true,$(TARGET_IS_TABLET)),,libqti-perfd-client)
+ 
++ifneq ($(TARGET_IS_TABLET),true)
+ # Power
+ PRODUCT_PACKAGES += \
+     android.hardware.power-service.xiaomi-libperfmgr
+@@ -334,10 +402,15 @@ PRODUCT_SOONG_NAMESPACES += \
+     hardware/google/interfaces \
+     hardware/google/pixel
+ 
++endif # !TARGET_IS_TABLET
++
++ifneq ($(TARGET_IS_TABLET),true)
+ # Public libraries
+ PRODUCT_COPY_FILES += \
+     $(LOCAL_PATH)/configs/public.libraries.txt:$(TARGET_COPY_OUT_VENDOR)/etc/public.libraries.txt
+ 
++endif # !TARGET_IS_TABLET
++
+ # QMI
+ PRODUCT_PACKAGES += \
+     libjson \
+@@ -346,6 +419,7 @@ PRODUCT_PACKAGES += \
+     libvndfwk_detect_jni.qti \
+     libvndfwk_detect_jni.qti.vendor
+ 
++ifneq ($(TARGET_IS_TABLET),true)
+ # RIL
+ PRODUCT_PACKAGES += \
+     libprotobuf-cpp-full \
+@@ -357,6 +431,9 @@ PRODUCT_PACKAGES += \
+     android.hardware.radio.config@1.3.vendor \
+     android.hardware.radio.deprecated@1.0.vendor
+ 
++endif # !TARGET_IS_TABLET
++
++ifneq ($(TARGET_IS_TABLET),true)
+ # Rootdir
+ PRODUCT_PACKAGES += \
+     fstab.qcom \
+@@ -381,6 +458,8 @@ PRODUCT_PACKAGES += \
+     init.xiaomi.rc \
+     ueventd.qcom.rc
+ 
++endif # !TARGET_IS_TABLET
++
+ # Sensors
+ PRODUCT_PACKAGES += \
+     android.hardware.sensors@1.0-impl-xiaomi \
+@@ -391,9 +470,10 @@ PRODUCT_PACKAGES += \
+ 
+ # Soong namespaces
+ PRODUCT_SOONG_NAMESPACES += \
+-    $(LOCAL_PATH) \
++    $(if $(filter true,$(TARGET_IS_TABLET)),,$(LOCAL_PATH)) \
+     hardware/xiaomi
+ 
++ifneq ($(TARGET_IS_TABLET),true)
+ # Telephony
+ PRODUCT_PACKAGES += \
+     ims-ext-common \
+@@ -407,6 +487,8 @@ PRODUCT_PACKAGES += \
+ PRODUCT_BOOT_JARS += \
+     telephony-ext
+ 
++endif # !TARGET_IS_TABLET
++
+ # Trust
+ PRODUCT_PACKAGES += \
+     vendor.lineage.trust@1.0-service
+@@ -419,9 +501,12 @@ PRODUCT_PACKAGES += \
+ PRODUCT_PACKAGES += \
+     vndservicemanager
+ 
++ifneq ($(TARGET_IS_TABLET),true)
+ # Vibrator
+ $(call inherit-product, vendor/qcom/opensource/vibrator/vibrator-vendor-product.mk)
+ 
++endif # !TARGET_IS_TABLET
++
+ # Wi-Fi
+ PRODUCT_PACKAGES += \
+     android.hardware.wifi@1.0-service \
+@@ -431,15 +516,18 @@ PRODUCT_PACKAGES += \
+     libwifi-hal-qcom \
+     vendor.qti.hardware.wifi.hostapd@1.2.vendor \
+     vendor.qti.hardware.wifi.supplicant@2.2.vendor \
+-    WifiOverlay \
++    $(if $(TARGET_WIFI_OVERLAY),$(TARGET_WIFI_OVERLAY),WifiOverlay) \
+     wpa_supplicant \
+     wpa_supplicant.conf
+ 
++ifneq ($(TARGET_IS_TABLET),true)
+ PRODUCT_COPY_FILES += \
+     $(LOCAL_PATH)/wifi/p2p_supplicant_overlay.conf:$(TARGET_COPY_OUT_VENDOR)/etc/wifi/p2p_supplicant_overlay.conf \
+     $(LOCAL_PATH)/wifi/wpa_supplicant_overlay.conf:$(TARGET_COPY_OUT_VENDOR)/etc/wifi/wpa_supplicant_overlay.conf \
+     $(LOCAL_PATH)/wifi/WCNSS_qcom_cfg.ini:$(TARGET_COPY_OUT_VENDOR)/etc/wifi/WCNSS_qcom_cfg.ini
+ 
++endif
++
+ # WiFi Display
+ PRODUCT_PACKAGES += \
+     libnl \
+@@ -449,4 +537,8 @@ PRODUCT_BOOT_JARS += \
+     WfdCommon
+ 
+ # Inherit the proprietary files
++ifneq ($(TARGET_COMMON_VENDOR_PRODUCT),)
++$(call inherit-product, $(TARGET_COMMON_VENDOR_PRODUCT))
++else
+ $(call inherit-product, vendor/xiaomi/sm8150-common/sm8150-common-vendor.mk)
++endif
+diff --git a/rootdir/Android.mk b/rootdir/Android.mk
+index af2372c..9593bdd 100644
+--- a/rootdir/Android.mk
++++ b/rootdir/Android.mk
+@@ -1,5 +1,7 @@
+ LOCAL_PATH := $(call my-dir)
+ 
++ifneq ($(TARGET_IS_TABLET),true)
++
+ include $(CLEAR_VARS)
+ LOCAL_MODULE       := fstab.qcom_ramdisk
+ LOCAL_MODULE_STEM  := fstab.qcom
+@@ -22,3 +24,5 @@ LOCAL_MODULE_CLASS := ETC
+ LOCAL_SRC_FILES    := etc/init.recovery.qcom.rc
+ LOCAL_MODULE_PATH  := $(TARGET_ROOT_OUT)
+ include $(BUILD_PREBUILT)
++
++endif # !TARGET_IS_TABLET
+diff --git a/odm-tablet.prop b/odm-tablet.prop
+new file mode 100644
+index 0000000..fa56b2f
+--- /dev/null
++++ b/odm-tablet.prop
+@@ -0,0 +1,46 @@
++# Audio
++vendor.audio.feature.a2dp_offload.enable=true
++vendor.audio.feature.afe_proxy.enable=true
++vendor.audio.feature.anc_headset.enable=true
++vendor.audio.feature.audiozoom.enable=false
++vendor.audio.feature.battery_listener.enable=true
++vendor.audio.feature.compr_cap.enable=false
++vendor.audio.feature.compress_in.enable=false
++vendor.audio.feature.compress_meta_data.enable=true
++vendor.audio.feature.compr_voip.enable=false
++vendor.audio.feature.concurrent_capture.enable=false
++vendor.audio.feature.custom_stereo.enable=true
++vendor.audio.feature.deepbuffer_as_primary.enable=false
++vendor.audio.feature.display_port.enable=true
++vendor.audio.feature.dsm_feedback.enable=false
++vendor.audio.feature.dynamic_ecns.enable=false
++vendor.audio.feature.external_dsp.enable=false
++vendor.audio.feature.external_speaker.enable=false
++vendor.audio.feature.external_speaker_tfa.enable=false
++vendor.audio.feature.ext_hw_plugin.enable=true
++vendor.audio.feature.fluence.enable=true
++vendor.audio.feature.fm.enable=true
++vendor.audio.feature.hdmi_edid.enable=true
++vendor.audio.feature.hdmi_passthrough.enable=true
++vendor.audio.feature.hfp.enable=true
++vendor.audio.feature.hifi_audio.enable=false
++vendor.audio.feature.hwdep_cal.enable=false
++vendor.audio.feature.incall_music.enable=true
++vendor.audio.feature.keep_alive.enable=true
++vendor.audio.feature.kpi_optimize.enable=true
++vendor.audio.feature.maxx_audio.enable=false
++vendor.audio.feature.multi_voice_session.enable=true
++vendor.audio.feature.ras.enable=true
++vendor.audio.feature.record_play_concurency.enable=false
++vendor.audio.feature.snd_mon.enable=true
++vendor.audio.feature.spkr_prot.enable=true
++vendor.audio.feature.src_trkn.enable=true
++vendor.audio.feature.ssrec.enable=true
++vendor.audio.feature.usb_offload_burst_mode.enable=true
++vendor.audio.feature.usb_offload.enable=true
++vendor.audio.feature.usb_offload_sidetone_volume.enable=false
++vendor.audio.feature.vbat.enable=true
++vendor.audio.feature.wsa.enable=false
++
++# Fwk detect
++ro.vendor.qti.va_odm.support=1
+diff --git a/system-tablet.prop b/system-tablet.prop
+new file mode 100644
+index 0000000..61e7a28
+--- /dev/null
++++ b/system-tablet.prop
+@@ -0,0 +1,53 @@
++# Audio
++audio.offload.min.duration.secs=30
++persist.vendor.audio.hac.enable=false
++persist.vendor.audio_hal.dsp_bit_width_enforce_mode=24
++
++# Camera
++camera.disable_zsl_mode=true
++
++# Charger
++ro.charger.disable_init_blank=true
++
++# Display
++debug.gralloc.gfx_ubwc_disable=0
++debug.sf.enable_hwc_vds=1
++debug.sf.latch_unsignaled=1
++persist.vendor.color.matrix=2
++
++# CNE
++persist.vendor.cne.feature=1
++
++# DPM
++persist.vendor.dpm.feature=1
++
++# Fwk detect
++ro.vendor.qti.va_aosp.support=1
++
++# IMS
++
++# IOP
++vendor.iop.enable_prefetch_ofr=1
++vendor.iop.enable_uxe=0
++
++# Media
++media.settings.xml=/vendor/etc/media_profiles_vendor.xml
++
++# Netflix
++ro.netflix.bsp_rev=Q855-16947-1
++
++# Perf
++ro.vendor.qti.core_ctl_max_cpu=4
++ro.vendor.qti.core_ctl_min_cpu=2
++
++# Radio
++
++# Netmgr
++persist.vendor.data.iwlan.enable=true
++persist.vendor.data.mode=concurrent
++
++# SSR
++persist.vendor.ssr.restart_level=ALL_ENABLE
++
++# Zygote
++persist.device_config.runtime_native.usap_pool_enabled=true
+diff --git a/vendor-tablet.prop b/vendor-tablet.prop
+new file mode 100644
+index 0000000..d2bba05
+--- /dev/null
++++ b/vendor-tablet.prop
+@@ -0,0 +1,266 @@
++# Audio
++aaudio.hw_burst_min_usec=2000
++aaudio.mmap_exclusive_policy=2
++audio.offload.buffer.size.kb=32
++audio.offload.gapless.enabled=true
++persist.audio.button_jack.profile=volume
++persist.audio.button_jack.switch=0
++persist.audio.fluence.speaker=true
++persist.audio.fluence.voicecall=true
++persist.audio.fluence.voicerec=false
++persist.vendor.audio.fluence.speaker=true
++persist.vendor.audio.fluence.tmic.enabled=false
++persist.vendor.audio.fluence.voicecall=true
++persist.vendor.audio.fluence.voicecomm=true
++persist.vendor.audio.fluence.voicerec=false
++persist.vendor.audio.ras.enabled=false
++persist.vendor.audio.ring.filter.mask=0
++persist.vendor.audio.voicecall.speaker.stereo=true
++ro.audio.monitorRotation=true
++ro.audio.recording.hd=true
++ro.qc.sdk.audio.fluencetype=none
++ro.qc.sdk.audio.ssr=false
++ro.vendor.audio.afe.record=true
++ro.vendor.audio.game.effect=true
++ro.vendor.audio.ring.filter=true
++ro.vendor.audio.scenario.support=true
++ro.vendor.audio.sdk.fluencetype=fluence
++ro.vendor.audio.sdk.ssr=false
++ro.vendor.audio.sfx.earadj=true
++ro.vendor.audio.sfx.scenario=true
++ro.vendor.audio.sos=true
++ro.vendor.audio.soundfx.type=mi
++ro.vendor.audio.soundfx.usb=true
++ro.vendor.audio.soundtrigger.cnn.adsp.level=27
++ro.vendor.audio.soundtrigger.cnn.level=27
++ro.vendor.audio.soundtrigger.gmm.adsp.level=50
++ro.vendor.audio.soundtrigger.gmm.level=50
++ro.vendor.audio.soundtrigger.gmm.user.adsp.level=10
++ro.vendor.audio.soundtrigger.gmm.user.level=10
++ro.vendor.audio.soundtrigger.lowpower=true
++ro.vendor.audio.soundtrigger=sva
++ro.vendor.audio.soundtrigger.training.level=50
++ro.vendor.audio.soundtrigger.vop.adsp.level=10
++ro.vendor.audio.soundtrigger.vop.level=10
++ro.vendor.audio.soundtrigger.xanzn.cnn.level=25
++ro.vendor.audio.soundtrigger.xanzn.gmm.level=45
++ro.vendor.audio.soundtrigger.xanzn.gmm.user.level=50
++ro.vendor.audio.soundtrigger.xanzn.vop.level=20
++ro.vendor.audio.soundtrigger.xatx.cnn.level.high=27
++ro.vendor.audio.soundtrigger.xatx.cnn.level.low=27
++ro.vendor.audio.soundtrigger.xatx.cnn.level.medium=27
++ro.vendor.audio.soundtrigger.xatx.gmm.level.high=50
++ro.vendor.audio.soundtrigger.xatx.gmm.level.low=50
++ro.vendor.audio.soundtrigger.xatx.gmm.level.medium=50
++ro.vendor.audio.soundtrigger.xatx.gmm.user.level.high=10
++ro.vendor.audio.soundtrigger.xatx.gmm.user.level.low=10
++ro.vendor.audio.soundtrigger.xatx.gmm.user.level.medium=10
++ro.vendor.audio.soundtrigger.xatx.vop.level.high=10
++ro.vendor.audio.soundtrigger.xatx.vop.level.low=10
++ro.vendor.audio.soundtrigger.xatx.vop.level.medium=10
++ro.vendor.audio.spk.clean=true
++ro.vendor.audio.spk.stereo=true
++ro.vendor.audio.surround.support=true
++ro.vendor.audio.us.proximity=false
++ro.vendor.audio.vocal.support=true
++ro.vendor.audio.voice.change.support=true
++ro.vendor.audio.voice.volume.boost=manual
++ro.vendor.audio.xiaoaitongxue.aec=true
++tunnel.audio.encode = true
++use.voice.path.for.pcm.voip=true
++vendor.audio.adm.buffering.ms=6
++vendor.audio.dolby.ds2.enabled=false
++vendor.audio.dolby.ds2.hardbypass=false
++vendor.audio.enable.mirrorlink=false
++vendor.audio.flac.sw.decoder.24bit=true
++vendor.audio.hal.boot.timeout.ms=20000
++vendor.audio_hal.in_period_size=144
++vendor.audio.hal.output.suspend.supported=false
++vendor.audio_hal.period_multiplier=3
++vendor.audio_hal.period_size=192
++vendor.audio.hw.aac.encoder=false
++vendor.audio.offload.buffer.size.kb=32
++vendor.audio.offload.gapless.enabled=true
++vendor.audio.offload.multiaac.enable=true
++vendor.audio.offload.multiple.enabled=false
++vendor.audio.offload.passthrough=false
++vendor.audio.offload.track.enable=false
++vendor.audio.parser.ip.buffer.size=262144
++vendor.audio.safx.pbe.enabled=false
++vendor.audio.spkcal.copy.inhal=true
++vendor.audio.tunnel.encode=false
++vendor.audio.usb.disable.sidetone=true
++vendor.audio.use.sw.alac.decoder=true
++vendor.audio.use.sw.ape.decoder=true
++vendor.audio.volume.headset.gain.depcal=true
++vendor.voice.path.for.pcm.voip=false
++
++# Bluetooth
++bluetooth.device.class_of_device=90,2,12
++bluetooth.profile.a2dp.source.enabled?=true
++bluetooth.profile.asha.central.enabled?=true
++bluetooth.profile.avrcp.target.enabled?=true
++bluetooth.profile.bap.broadcast.assist.enabled?=true
++bluetooth.profile.bap.unicast.client.enabled?=true
++bluetooth.profile.bas.client.enabled?=true
++bluetooth.profile.csip.set_coordinator.enabled?=true
++bluetooth.profile.gatt.enabled?=true
++bluetooth.profile.hap.client.enabled?=true
++bluetooth.profile.hfp.ag.enabled?=true
++bluetooth.profile.hid.device.enabled?=true
++bluetooth.profile.hid.host.enabled?=true
++bluetooth.profile.map.server.enabled?=true
++bluetooth.profile.mcp.server.enabled?=true
++bluetooth.profile.opp.enabled?=true
++bluetooth.profile.pan.nap.enabled?=true
++bluetooth.profile.pan.panu.enabled?=true
++bluetooth.profile.pbap.server.enabled?=true
++bluetooth.profile.sap.server.enabled?=true
++bluetooth.profile.ccp.server.enabled?=true
++bluetooth.profile.vcp.controller.enabled?=true
++persist.bluetooth.a2dp_offload.cap=sbc-aac-aptx-aptxhd-ldac
++persist.bluetooth.a2dp_offload.disabled=false
++persist.vendor.bt.a2dp.mac_whitelist=false
++persist.vendor.bt.a2dp_offload_cap=sbc-aptx-aptxtws-aptxhd-aptxadaptive-aac-ldac
++persist.vendor.btstack.a2dp_offload_cap=sbc-aptx-aptxtws-aptxhd-aptxadaptive-aac-ldac
++persist.vendor.btsatck.absvolfeature=true
++persist.vendor.btstack.enable.splita2dp=true
++persist.vendor.qcom.bluetooth.a2dp_offload_cap=sbc-aptx-aptxtws-aptxhd-aac-ldac-aptxadaptive
++persist.vendor.qcom.bluetooth.aac_frm_ctl.enabled=true
++persist.vendor.qcom.bluetooth.aac_vbr_ctl.enabled=false
++persist.vendor.qcom.bluetooth.enable.splita2dp=true
++persist.vendor.qcom.bluetooth.scram.enabled=true
++persist.vendor.qcom.bluetooth.soc=cherokee
++persist.vendor.qcom.bluetooth.twsp_state.enabled=false
++ro.bluetooth.a2dp_offload.supported=true
++ro.bluetooth.emb_wp_mode=false
++ro.bluetooth.wipower=false
++ro.vendor.bluetooth.wipower=false
++vendor.bluetooth.soc=cherokee
++vendor.qcom.bluetooth.soc=cherokee
++
++# Chipset
++ro.soc.manufacturer=QTI
++ro.soc.model=SM8150
++
++# Crypto
++ro.crypto.volume.filenames_mode=aes-256-cts
++ro.crypto.dm_default_key.options_format.version=2
++ro.crypto.volume.metadata.method=dm-default-key
++
++# Dalvik
++dalvik.vm.heapgrowthlimit=256m
++dalvik.vm.heapmaxfree=8m
++dalvik.vm.heapminfree=512k
++dalvik.vm.heapsize=512m
++dalvik.vm.heapstartsize=8m
++dalvik.vm.heaptargetutilization=0.75
++
++# Display
++persist.sys.sf.color_mode=9
++persist.sys.sf.color_saturation=1.0
++persist.sys.sf.native_mode=2
++ro.surface_flinger.has_HDR_display=true
++ro.surface_flinger.has_wide_color_display=true
++ro.surface_flinger.use_color_management=true
++ro.surface_flinger.wcg_composition_dataspace=143261696
++ro.vendor.display.ad=1
++ro.vendor.display.ad.sdr_calib_data=/vendor/etc/sdr_config.cfg
++ro.vendor.display.ad.hdr_calib_data=/vendor/etc/hdr_config.cfg
++ro.vendor.display.default_fps=60
++ro.vendor.display.sensortype=2
++vendor.display.comp_mask=0
++vendor.display.dataspace_saturation_matrix=1.0,0.0,0.0,0.0,1.0,0.0,0.0,0.0,1.0
++vendor.display.disable_decimation=1
++vendor.display.disable_excl_rect=0
++vendor.display.disable_hw_recovery_dump=1
++vendor.display.disable_inline_rotator=1
++vendor.display.disable_scaler=0
++vendor.display.disable_ui_3d_tonemap=1
++vendor.display.enable_default_color_mode=0
++vendor.display.enable_force_split=1
++vendor.display.enable_null_display=0
++vendor.display.enable_optimize_refresh=1
++vendor.display.qdcm.disable_factory_mode=1
++vendor.display.qdcm.mode_combine=1
++
++# DRM
++drm.service.enabled=true
++
++# Fingerprint
++persist.vendor.qfp=false
++
++# FRP
++ro.frp.pst=/dev/block/bootdevice/by-name/frp
++
++# Gatekeeper
++vendor.gatekeeper.disable_spu=true
++
++# GPS
++persist.backup.ntpServer=0.pool.ntp.org
++
++# Graphics
++debug.egl.hw=0
++debug.mdpcomp.logs=0
++debug.sf.enable_advanced_sf_phase_offset=1
++debug.sf.enable_gl_backpressure=1
++debug.sf.high_fps_early_phase_offset_ns=-4000000
++debug.sf.high_fps_late_app_phase_offset_ns=1000000
++debug.sf.hw=0
++debug.sf.latch_unsignaled=1
++persist.demo.hdmirotationlock=false
++ro.hardware.egl=adreno
++ro.hardware.vulkan=adreno
++ro.opengles.version=196610
++vendor.gralloc.disable_ubwc=0
++
++# Media
++debug.stagefright.ccodec=1
++debug.stagefright.omx_default_rank=0
++
++# OTG
++persist.sys.oem.otg_support=true
++
++# PASR
++vendor.power.pasr.enabled=false
++
++# Perf
++ro.vendor.extension_library=libqti-perfd-client.so
++
++# Qualcomm System Daemon
++persist.vendor.qcomsysd.enabled=1
++
++# Radio
++persist.data.df.iwlan_mux=9
++persist.rcs.otp_sms_port=0
++persist.rcs.supported=1
++persist.vendor.data.iwlan.enable=true
++rild.libpath=/vendor/lib64/libril-qc-hal-qmi.so
++ro.com.android.dataroaming=false
++
++# Sensors
++persist.vendor.sensors.enable.mag_filter=true
++
++# Shutdown
++sys.vendor.shutdown.waittime=500
++
++# USB
++vendor.usb.diag.func.name=diag
++vendor.usb.dpl.inst.name=dpl
++vendor.usb.qdss.inst.name=qdss
++vendor.usb.rmnet.func.name=gsi
++vendor.usb.rmnet.inst.name=rmnet
++vendor.usb.rndis.func.name=gsi
++vendor.usb.use_ffs_mtp=0
++vendor.usb.use_gadget_hal=0
++
++# WFD
++ro.surface_flinger.force_hwc_copy_for_virtual_displays=true
++ro.surface_flinger.max_virtual_display_dimension=4096
++ro.surface_flinger.max_frame_buffer_acquired_buffers=3
++
++# WiFi
++wifi.aware.interface=wifi-aware0
++
++# Zygote
++zygote.critical_window.minute=10

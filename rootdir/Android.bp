@@ -6,98 +6,112 @@
 
 // Init scripts
 sh_binary {
-    name: "init.class_main.sh",
+    name: "nabu_init.class_main.sh",
+    filename: "init.class_main.sh",
     src: "bin/init.class_main.sh",
     vendor: true,
 }
 
 sh_binary {
-    name: "init.qcom.class_core.sh",
+    name: "nabu_init.qcom.class_core.sh",
+    filename: "init.qcom.class_core.sh",
     src: "bin/init.qcom.class_core.sh",
     vendor: true,
 }
 
 sh_binary {
-    name: "init.qcom.early_boot.sh",
+    name: "nabu_init.qcom.early_boot.sh",
+    filename: "init.qcom.early_boot.sh",
     src: "bin/init.qcom.early_boot.sh",
     vendor: true,
 }
 
 sh_binary {
-    name: "init.qcom.post_boot.sh",
+    name: "nabu_init.qcom.post_boot.sh",
+    filename: "init.qcom.post_boot.sh",
     src: "bin/init.qcom.post_boot.sh",
     vendor: true,
 }
 
 sh_binary {
-    name: "init.qcom.sh",
+    name: "nabu_init.qcom.sh",
+    filename: "init.qcom.sh",
     src: "bin/init.qcom.sh",
     vendor: true,
 }
 
 sh_binary {
-    name: "init.qcom.usb.sh",
+    name: "nabu_init.qcom.usb.sh",
+    filename: "init.qcom.usb.sh",
     src: "bin/init.qcom.usb.sh",
     vendor: true,
 }
 
 sh_binary {
-    name: "init.qti.chg_policy.sh",
+    name: "nabu_init.qti.chg_policy.sh",
+    filename: "init.qti.chg_policy.sh",
     src: "bin/init.qti.chg_policy.sh",
     vendor: true,
 }
 
 sh_binary {
-    name: "init.qti.dcvs.sh",
+    name: "nabu_init.qti.dcvs.sh",
+    filename: "init.qti.dcvs.sh",
     src: "bin/init.qti.dcvs.sh",
     vendor: true,
 }
 
 // Init configuration files
 prebuilt_etc {
-    name: "init.qcom.power.rc",
+    name: "nabu_init.qcom.power.rc",
+    filename: "init.qcom.power.rc",
     src: "etc/init.qcom.power.rc",
     sub_dir: "init/hw",
     vendor: true,
 }
 
 prebuilt_etc {
-    name: "init.qcom.rc",
+    name: "nabu_init.qcom.rc",
+    filename: "init.qcom.rc",
     src: "etc/init.qcom.rc",
     sub_dir: "init/hw",
     vendor: true,
 }
 
 prebuilt_etc {
-    name: "init.qcom.usb.rc",
+    name: "nabu_init.qcom.usb.rc",
+    filename: "init.qcom.usb.rc",
     src: "etc/init.qcom.usb.rc",
     sub_dir: "init/hw",
     vendor: true,
 }
 
 prebuilt_etc {
-    name: "init.target.rc",
+    name: "nabu_init.target.rc",
+    filename: "init.target.rc",
     src: "etc/init.target.rc",
     sub_dir: "init/hw",
     vendor: true,
 }
 
 prebuilt_etc {
-    name: "init.xiaomi.rc",
+    name: "nabu_init.xiaomi.rc",
+    filename: "init.xiaomi.rc",
     src: "etc/init.xiaomi.rc",
     sub_dir: "init/hw",
     vendor: true,
 }
 
 prebuilt_etc {
-    name: "ueventd.qcom.rc",
+    name: "nabu_ueventd.qcom.rc",
     filename: "ueventd.rc",
     src: "etc/ueventd.qcom.rc",
     vendor: true,
 }
 
 prebuilt_etc {
-    name: "init.nabu.perf.rc",
+    name: "nabu_init.nabu.perf.rc",
+    filename: "init.nabu.perf.rc",
     src: "etc/init.nabu.perf.rc",
     sub_dir: "init",
     vendor: true,

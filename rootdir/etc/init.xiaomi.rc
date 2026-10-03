@@ -9,4 +9,12 @@ on boot
     chmod 0700 /sys/class/drm/card0-DSI-1/disp_param
     chown system system /sys/class/drm/card0-DSI-1/panel_info
     chmod 0744 /sys/class/drm/card0-DSI-1/panel_info
-    chmod 0666 /dev/input/event2
+
+# Official sm8150 kernel controls exposed by tp_common and xiaomi_keyboard.
+on boot
+    chown system system /sys/touchpanel/double_tap
+    chmod 0660 /sys/touchpanel/double_tap
+    chown system system /sys/touchpanel/pen
+    chmod 0660 /sys/touchpanel/pen
+    chown system system /sys/devices/platform/soc/soc:xiaomi_keyboard/xiaomi_keyboard_enabled
+    chmod 0660 /sys/devices/platform/soc/soc:xiaomi_keyboard/xiaomi_keyboard_enabled

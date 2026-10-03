@@ -54,6 +54,34 @@ if [ -z "${SRC}" ]; then
 fi
 
 
+function blob_fixup() {
+    case "${1}" in
+        vendor/lib/hw/audio.primary.nabu.so)
+            [ -z "${2}" ] && return 0
+            "${PATCHELF}" --set-soname audio.primary.nabu.so "${2}"
+            python3 - "${2}" <<'PYFIX'
+from pathlib import Path
+import sys
+p = Path(sys.argv[1])
+old = b'/vendor/lib/liba2dpoffload.so'
+new = b'liba2dpoffload_nabu.so'
+p.write_bytes(p.read_bytes().replace(old, new + b'\0' * (len(old) - len(new))))
+PYFIX
+            ;;
+        vendor/lib/liba2dpoffload_nabu.so)
+            [ -z "${2}" ] && return 0
+            "${PATCHELF}" --set-soname liba2dpoffload_nabu.so "${2}"
+            ;;
+        vendor/lib64/camera/components/com.qti.node.watermark.so)
+            [ -z "${2}" ] && return 0
+            "${PATCHELF}" --print-needed "${2}" | grep -q libpiex_shim.so || "${PATCHELF}" --add-needed libpiex_shim.so "${2}"
+            ;;
+        *) return 1 ;;
+    esac
+    return 0
+}
+function blob_fixup_dry() { blob_fixup "$1" ""; }
+
 # Initialize the helper
 setup_vendor "${DEVICE}" "${VENDOR}" "${ANDROID_ROOT}" false "${CLEAN_VENDOR}"
 

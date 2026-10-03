@@ -1,0 +1,38 @@
+[
+  {
+    "path": "device/xiaomi/nabu",
+    "upstream": "https://github.com/dev-harsh1998/android_device_xiaomi_nabu",
+    "branch": "lineage-20",
+    "commit": "43eca20ee3f70f46e8c07e7d8870658103327894"
+  },
+  {
+    "path": "device/xiaomi/sm8150-common",
+    "upstream": "https://github.com/LineageOS/android_device_xiaomi_sm8150-common",
+    "branch": "lineage-20",
+    "commit": "4cac39f0893ce962065a4a634c3bb92aa24b83a0"
+  },
+  {
+    "path": "kernel/xiaomi/sm8150",
+    "upstream": "https://github.com/LineageOS/android_kernel_xiaomi_sm8150",
+    "branch": "lineage-22.2",
+    "commit": "59220a048d04516e7fe1dfc094507930166a1e60"
+  },
+  {
+    "path": "vendor/xiaomi/nabu",
+    "upstream": "https://gitlab.com/dev-harsh1998/android_vendor_xiaomi_nabu",
+    "branch": "lineage-20",
+    "commit": "c33296839734ef1f6e69c078de10bf1c338e27e5"
+  },
+  {
+    "path": "vendor/xiaomi/sm8150-common",
+    "upstream": "https://github.com/TheMuppets/proprietary_vendor_xiaomi_sm8150-common",
+    "branch": "lineage-20",
+    "commit": "719dc0a51a4629cfd1dc99f9656c563bae919a76"
+  },
+  {
+    "path": "hardware/xiaomi",
+    "upstream": "https://github.com/LineageOS/android_hardware_xiaomi",
+    "branch": "lineage-20",
+    "commit": "cf41643853c2977853ebb07efd6fdd32e2ec7117"
+  }
+]
