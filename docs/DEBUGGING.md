@@ -103,3 +103,13 @@ adb shell dmesg > nabu-recovery-dmesg-verbose.log
 `m nabu-debug-init`、host_init_verifier 和 recovery 应用脚本的 bash 语法检查通过。`tools/apply-adb-recovery-fix.sh` 可在 recovery 将新 rc 写入当前槽位的 system，不修改 userdata 设置；写入前备份原文件并尽量恢复只读挂载。运行包位于 `/home/dengxh/nabu_debug/adb-recovery-fix/`。当前主机未连接到设备，尚未执行恢复脚本或验证系统 ADB。若找不到当前逻辑 system 设备，应先通过 recovery 的挂载 system 功能创建映射。
 
 Wi-Fi HAL 写驱动状态返回 Invalid argument；随后内核在约 48 秒记录 `Fatal error on modem!`、`Kernel panic - not syncing: subsys-restart: Resetting the SoC - modem crashed.`。这证明有真实的子系统 panic，尚未证明是 Wi-Fi 驱动本身、固件或配套服务缺失导致。本次不修改重启策略或掩盖 panic；先恢复正常系统 ADB 以便收集实时日志。
+
+## 恢复 modem/DSP 的文件访问服务
+
+后续输入：`/home/dengxh/nabu_debug/logcat.txt`。adbd 已成功启动，日志显示 authentication not required；前述 ADB 时机修复已实机生效。pm-proxy 在启动时给 modem 投票，并加载 modem.mdt/bXX，固件被拉出 reset；不是仅在 Wi-Fi 开启时才启动 modem。Wi-Fi 驱动加载等待约 20 秒后失败，随后 modem fatal interrupt 导致 SYSTEM 级 SSR/panic。
+
+日志同时明确记录旧 init 的 `start rmt_storage`、`start rfs_access` 找不到服务；common 中对应的 remote storage/TFTP 程序与 rc 被 nabu 过滤列表删掉。恢复 rmt_storage、tftp_server 和两份 service rc，并恢复 TFTP 的 DT_NEEDED 依赖 libqsocket.so；init 改用实际声明的 vendor.rmt_storage 和 vendor.tftp_server。它们为 Qualcomm 固件提供存储/文件服务，不等于恢复蜂窝网络功能；无需复制 nabu blobs 或修改公共仓库。
+
+恢复文件的 ELF 依赖检查通过（1514 个复制目的地、976 项保留 blob）；服务及设备 init 的 host_init_verifier 检查通过，现有 SELinux file_contexts 已有 vendor_rmt_storage_exec/vendor_rfs_access_exec 标签。缺失服务是明确的集成问题，与 modem panic 的关联仍需新 ROM 实机确认；没有修改 SSR 重启级别来隐藏崩溃。
+
+五项恢复文件及最终 init.target.rc 的定向构建通过；输出与源文件一致。完整 ROM 重新打包与 Wi-Fi 实机复测交由用户进行。

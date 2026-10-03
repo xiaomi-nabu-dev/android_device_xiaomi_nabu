@@ -2,7 +2,8 @@
 # Keep the upstream common vendor tree untouched. Nabu has no cellular modem,
 # GNSS, FM, camera motor or payment/fingerprint hardware. Shared dependencies
 # of retained HALs (including libqcbor and Bluetooth FM interfaces) and the
-# QRTR/PD services used by DSP peripherals must remain installed.
+# QRTR/PD, remote storage and TFTP services used by DSP peripherals must remain
+# installed even on an APQ tablet without cellular networking.
 include vendor/xiaomi/sm8150-common/sm8150-common-vendor.mk
 
 NABU_PHONE_ONLY_COPY_DESTINATIONS := \
@@ -61,11 +62,9 @@ NABU_PHONE_ONLY_COPY_DESTINATIONS := \
     $(TARGET_COPY_OUT_VENDOR)/bin/qrtr-cfg \
     $(TARGET_COPY_OUT_VENDOR)/bin/qrtr-lookup \
     $(TARGET_COPY_OUT_VENDOR)/bin/qti \
-    $(TARGET_COPY_OUT_VENDOR)/bin/rmt_storage \
     $(TARGET_COPY_OUT_VENDOR)/bin/slim_daemon \
     $(TARGET_COPY_OUT_VENDOR)/bin/ssgqmigd \
     $(TARGET_COPY_OUT_VENDOR)/bin/ssgtzd \
-    $(TARGET_COPY_OUT_VENDOR)/bin/tftp_server \
     $(TARGET_COPY_OUT_VENDOR)/bin/xtra-daemon \
     $(TARGET_COPY_OUT_VENDOR)/bin/xtwifi-client \
     $(TARGET_COPY_OUT_VENDOR)/bin/xtwifi-inet-agent \
@@ -91,8 +90,6 @@ NABU_PHONE_ONLY_COPY_DESTINATIONS := \
     $(TARGET_COPY_OUT_VENDOR)/etc/init/ssgtzd.rc \
     $(TARGET_COPY_OUT_VENDOR)/etc/init/vendor.qti.hardware.alarm@1.0-service.rc \
     $(TARGET_COPY_OUT_VENDOR)/etc/init/vendor.qti.hardware.soter@1.0-service.rc \
-    $(TARGET_COPY_OUT_VENDOR)/etc/init/vendor.qti.rmt_storage.rc \
-    $(TARGET_COPY_OUT_VENDOR)/etc/init/vendor.qti.tftp.rc \
     $(TARGET_COPY_OUT_VENDOR)/etc/init/vendor.xiaomi.hardware.mlipay@1.1-service.rc \
     $(TARGET_COPY_OUT_VENDOR)/etc/izat.conf \
     $(TARGET_COPY_OUT_VENDOR)/etc/lowi.conf \
@@ -166,7 +163,6 @@ NABU_PHONE_ONLY_COPY_DESTINATIONS := \
     $(TARGET_COPY_OUT_VENDOR)/lib64/libqcrilFramework.so \
     $(TARGET_COPY_OUT_VENDOR)/lib64/libqcrildatactl.so \
     $(TARGET_COPY_OUT_VENDOR)/lib64/libqdma_file_agent.so \
-    $(TARGET_COPY_OUT_VENDOR)/lib64/libqsocket.so \
     $(TARGET_COPY_OUT_VENDOR)/lib64/librcc.so \
     $(TARGET_COPY_OUT_VENDOR)/lib64/libril-qc-hal-qmi.so \
     $(TARGET_COPY_OUT_VENDOR)/lib64/libril-qc-logger.so \
