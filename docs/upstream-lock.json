@@ -11,7 +11,7 @@
     "branch": "lineage-20",
     "commit": "4cac39f0893ce962065a4a634c3bb92aa24b83a0",
     "local_integration_branch": "nabu-los20",
-    "local_integration_commit": "9f73a6387f40b8cfe2c7a50006f154af11c2d963"
+    "local_integration_commit": "6cbd90d690e13886881b0f16affb1da2c0ab0d23"
   },
   {
     "path": "kernel/xiaomi/sm8150",

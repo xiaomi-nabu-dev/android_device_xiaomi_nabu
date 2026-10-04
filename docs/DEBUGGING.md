@@ -179,3 +179,13 @@ Git Bash 会将 /sys 等参数转换为 Windows 路径。外部 adb shell 命令
 设置页面的 Device name 优先读取 Settings.Global.device_name，缺省才取 Build.MODEL；已有数据库不会因为修改默认 overlay 就自动覆盖用户名称。用户计划清除用户数据重刷，因此新数据库会使用更新后的默认名称，无需额外迁移旧设置。
 
 init_nabu（32/64 位）和 SettingsProviderOverlayNabu 定向构建通过；库内确认名称为 Xiaomi Pad 5、没有旧型号编号，aapt2 确认两项默认名称资源均为 Xiaomi Pad 5。静态树和 diff 检查通过，实际设置页显示待新 ROM 验证。
+
+## 内置 HID 控制器与幽灵物理键盘
+
+logcat 显示 Xiaomi Pad 来自内部 a800000 USB 控制器，HID VID/PID=3206:3ffc，由 hid-xiaomi 处理。其控制器位于平板内部，即使没有接 pogo-pin 键盘仍会枚举；和外接 USB/蓝牙键盘不是同一来源。当前 HID/平台驱动默认 connected=true、user_enabled=true。用户在没有键盘时读到 xiaomi_keyboard_connected=1、xiaomi_keyboard_conn_status=0、xiaomi_keyboard_enabled=1；legacy conn_status 是 IRQ 处理中的翻转值，不能直接当作可靠的物理接入检测。用户没有原装键盘，暂不修改驱动的连接协议/热插拔逻辑。
+
+另有明确的用户空间问题：ro.vendor.sm8150.tablet.keyboard_node（以及 stylus/double_tap 节点路径）从 vendor/build.prop 加载时没有 vendor_init 的 property_service set 权限，日志显示属性被拒绝；hwcontrol 取得空路径后返回 unsupported，而设置应用隐藏了异常。common 的可选 tablet 策略补上对应类型的 set_prop(vendor_init, sm8150_tablet_config_prop)，并令设置应用和服务记录实际错误。没有扩大整个 vendor 属性空间或停用 HID 驱动。
+
+平板设置的键盘开关和其开机恢复值原本默认是 0；权限修复后可写入 xiaomi_keyboard_enabled=0，hid-xiaomi 的回调会在约 1 秒后移除该输入设备。如果已有键盘偏好为开启，需关闭一次再复测；未来使用原装键盘时仍可手动开启。此修复恢复用户设置控制，不等于新增自动物理接入检测。
+
+XiaomiTabletSettings、custom.hardware.hwcontrol-service 和 selinux_policy 构建通过；包括 neverallow/Treble 策略检查。实际关闭后输入设备是否移除、重启是否保持，以及原装键盘启用行为仍待实机验证。
