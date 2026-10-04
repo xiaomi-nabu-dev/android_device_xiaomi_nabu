@@ -53,6 +53,7 @@ PRODUCT_COPY_FILES += $(LOCAL_PATH)/wifi/wpa_supplicant_overlay.conf:$(TARGET_CO
 PRODUCT_COPY_FILES += $(LOCAL_PATH)/wifi/WCNSS_qcom_cfg.ini:$(TARGET_COPY_OUT_VENDOR)/etc/wifi/WCNSS_qcom_cfg.ini
 DEVICE_PACKAGE_OVERLAYS += $(LOCAL_PATH)/overlay-lineage
 PRODUCT_PACKAGES += SystemUIOverlayNabu SettingsProviderOverlayNabu SettingsOverlayNabu FrameworkResOverlayNabu
+PRODUCT_PACKAGES += NetworkStackOverlayNabu
 $(call inherit-product, vendor/xiaomi/nabu/nabu-vendor.mk)
 
 # Standard policy includes referenced by the nabu policy.

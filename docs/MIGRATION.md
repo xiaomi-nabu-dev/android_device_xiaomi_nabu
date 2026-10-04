@@ -65,3 +65,16 @@ bash device/xiaomi/nabu/setup-makefiles.sh
 以原 43eca20 为终点的 616 个旧提交已压成一个根快照；之后的移植、recovery 修复、ADB 调试、清理与公共实现整合分别提交。原始历史及整合前的仓库快照在源码树外 `/home/dengxh/android2/nabu-dt-backups/` 的 Git bundle 中保留，上游远程分支用于溯源。
 
 此前从 337 清理到 278 个文件，本次进一步把可配置公共实现移入 common，设备树主要保留数据和硬件差异。当前验证结果见 [VALIDATION.md](VALIDATION.md)；recovery/ADB 调试说明见 [DEBUGGING.md](DEBUGGING.md)。
+
+## 大陆网络验证地址
+
+nabu 的 NetworkStackOverlayNabu 安装在 product 分区，针对 com.android.networkstack 的 NetworkStackConfig 配置 HTTP、HTTPS 和 fallback URL。HTTP 使用用户指定的 http://connect.rom.miui.com/generate_204，HTTPS 使用 https://connect.rom.miui.com/generate_204；同时设置单 URL 和多 URL 数组，避免其他设置或默认数组仍选到 Google 地址。保留 HTTPS 验证与 captive portal 检测本身，不改公共 NetworkStack 源码。
+
+这是 NetworkStack 的资源配置，优先级高于 Settings.Global URL 设置；不需要通过 SettingsProvider 初始化数据库或清除用户数据。刷入新 ROM 并重启/重新连接 Wi-Fi 后，可查看生效配置：
+
+```bash
+adb shell cmd overlay lookup com.android.networkstack com.android.networkstack:string/config_captive_portal_http_url
+adb shell cmd overlay lookup com.android.networkstack com.android.networkstack:string/config_captive_portal_https_url
+```
+
+本机 HTTP/HTTPS 的 HEAD 和 GET 请求均返回 204、空响应体；五项资源通过 NetworkStackConfig product overlayable 策略核对，overlay 定向构建通过，aapt2 确认包内没有 Google 探测地址。大陆实际网络和需要网页认证的 Wi-Fi 仍需实机确认。
