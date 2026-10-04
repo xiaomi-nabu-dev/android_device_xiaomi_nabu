@@ -75,9 +75,9 @@ void witch_nabu()
 {
 
   dv variants[2] = {
-      {"21051182G", "nabu_global", "Xiaomi/nabu_global/nabu:12/RKQ1.200826.002/V13.1.4.0.SKXMIXM:user/release-keys",
+      {"Xiaomi Pad 5", "nabu_global", "Xiaomi/nabu_global/nabu:12/RKQ1.200826.002/V13.1.4.0.SKXMIXM:user/release-keys",
        "nabu_global-user 12 SKQ1.220303.001 V13.1.4.0.SKXMIXM release-keys"},
-      {"21051182C", "nabu", "Xiaomi/nabu/nabu:13/RKQ1.200826.002/V14.0.4.0.TKXCNXM:user/release-keys",
+      {"Xiaomi Pad 5", "nabu", "Xiaomi/nabu/nabu:13/RKQ1.200826.002/V14.0.4.0.TKXCNXM:user/release-keys",
        "nabu-user 13 TKQ1.221013.002 V14.0.4.0.TKXCNXM release-keys"},
   };
 

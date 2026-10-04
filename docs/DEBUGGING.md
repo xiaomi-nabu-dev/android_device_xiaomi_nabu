@@ -171,3 +171,11 @@ Git Bash 会将 /sys 等参数转换为 Windows 路径。外部 adb shell 命令
 实际修改函数的 host harness 通过 SM8150 和通用两种编译路径：辅助设备、BMS、在线/离线充电器、设备范围 supply、属性读取错误和 battery 分支。checkpatch --strict 无错误/警告/检查项；bootimage 和 vendorbootimage 构建通过（2 分 16 秒），两镜像的嵌入 AVB hash 校验通过。vendor_boot 解包确认正常/recovery fstab 均恢复 F2FS。
 
 测试镜像位于 `/home/dengxh/nabu_debug/power-supply-fix/`；本次内核逻辑修复只需刷 boot，recovery 也复用其中的内核，无需格式化 data。实际日志是否停止及充电/电池状态仍待实机复测。后续组织仓库发布必须包含新 kernel 整合提交，不能仅取官方基线。
+
+## 独立修复：设备名称统一为 Xiaomi Pad 5
+
+用户工作区已将 libinit 中国际版和国行版的 model 从 21051182G/21051182C 改为 Xiaomi Pad 5，并将 SettingsProvider 的旧默认设备名资源 def_device_name 从 Xiaomi Mi Pad 5 改为 Xiaomi Pad 5。上述修改保留；补充当前 SettingsProvider 实际使用的 def_device_name_simple，同样为 Xiaomi Pad 5。产品地区名称 nabu_global/nabu 及 fingerprint/description 保持原区域配置。
+
+设置页面的 Device name 优先读取 Settings.Global.device_name，缺省才取 Build.MODEL；已有数据库不会因为修改默认 overlay 就自动覆盖用户名称。用户计划清除用户数据重刷，因此新数据库会使用更新后的默认名称，无需额外迁移旧设置。
+
+init_nabu（32/64 位）和 SettingsProviderOverlayNabu 定向构建通过；库内确认名称为 Xiaomi Pad 5、没有旧型号编号，aapt2 确认两项默认名称资源均为 Xiaomi Pad 5。静态树和 diff 检查通过，实际设置页显示待新 ROM 验证。
