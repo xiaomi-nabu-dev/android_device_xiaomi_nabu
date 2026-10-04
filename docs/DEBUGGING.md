@@ -189,3 +189,9 @@ logcat 显示 Xiaomi Pad 来自内部 a800000 USB 控制器，HID VID/PID=3206:3
 平板设置的键盘开关和其开机恢复值原本默认是 0；权限修复后可写入 xiaomi_keyboard_enabled=0，hid-xiaomi 的回调会在约 1 秒后移除该输入设备。如果已有键盘偏好为开启，需关闭一次再复测；未来使用原装键盘时仍可手动开启。此修复恢复用户设置控制，不等于新增自动物理接入检测。
 
 XiaomiTabletSettings、custom.hardware.hwcontrol-service 和 selinux_policy 构建通过；包括 neverallow/Treble 策略检查。实际关闭后输入设备是否移除、重启是否保持，以及原装键盘启用行为仍待实机验证。
+
+## 配套防回归：双击唤醒使用单一设置来源
+
+修复 tablet 节点属性加载后，自定义平板设置原来的 SyncTap2Wake 会在开机时读取另一份 shared preference（默认 0），可能覆盖 PowerManager 已恢复的标准显示设置。nabu 将 config_support_tap2wake 设为 false，隐藏重复的自定义 Activity，并跳过这条 boot-time 写入；FrameworkResOverlayNabu 的 config_supportDoubleTapWake=true 与 Power HAL 节点支持保持启用。键盘/触控笔的能力配置保留。
+
+XiaomiTabletSettings 定向构建通过；aapt2 确认 config_support_keyboard=true、config_support_tap2wake=false，静态树与 diff 检查通过。标准双击唤醒开关的重启持久性仍需实机复测。
